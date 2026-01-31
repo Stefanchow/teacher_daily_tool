@@ -1,0 +1,4 @@
+export const INPUT_CLASSES = "w-full h-11 border rounded-lg px-3 outline-none transition-all text-base shadow-sm border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--input-field-text-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]";
+export const TEXTAREA_CLASSES = "w-full border rounded-lg p-3 outline-none transition-all text-base shadow-sm min-h-[100px] border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--input-field-text-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]";
+export const LABEL_CLASSES = "block text-sm font-bold mb-1.5 tracking-wide text-[var(--text-secondary)]";
+export const SELECT_CLASSES = "w-full h-11 border rounded-lg px-3 outline-none transition-all text-base shadow-sm border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--input-field-text-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]";

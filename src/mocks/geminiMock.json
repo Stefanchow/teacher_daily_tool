@@ -1,0 +1,166 @@
+[
+  {
+    "title": "水循环 (The Water Cycle)",
+    "grade": "Grade 2",
+    "duration": 45,
+    "teachingPreparation": {
+      "objectives": [
+        "Understand the three stages of the water cycle.",
+        "Use body movements to represent weather changes.",
+        "Appreciate the importance of water conservation."
+      ],
+      "keyWords": [
+        "Evaporation", "Condensation", "Precipitation",
+        "It goes up/down",
+        "Present Simple Tense"
+      ],
+      "duration": 45,
+      "teachingAids": "Water Cycle Poster, Spray bottle, Clear cup, Hot water",
+      "studentAnalysis": "本课程采用PWP模式，结合TPR教学法（热身环节），适合低年级学生。通过视觉（图表）、听觉（歌曲）和动觉（模拟暴风雨）的多感官刺激，帮助学生深入理解水循环的概念。",
+      "sentenceStructures": "It goes up/down. This is...",
+      "audienceAnalysis": [
+        { "type": "general", "description": "Analysis for 7-8 year old beginners with kinesthetic learning style.", "ageRange": "7-8", "proficiency": "Beginner", "learningStyle": "Kinesthetic" }
+      ]
+    },
+    "procedures": [
+      {
+        "step": "第一步：热身：暴风雨 (Warm-up: Rainstorm)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Can you hear the rain? Rub your hands! Now snap your fingers! Clap louder! Stomp your feet! It's a storm!'",
+        "studentsOutput": "👥 Students: (Rubbing, Snapping, Clapping, Stomping)",
+        "justification": "💡 设计意图：通过TPR（全身反应法）激活课堂气氛，建立声音与天气现象的联系。"
+      },
+      {
+        "step": "第二步：展示：水循环图 (Presentation: Water Cycle Diagram)",
+        "duration": 10,
+        "teachersTalk": "🗣️ Teacher: 'Look at the water. The sun makes it hot. It goes UP! This is Evaporation. Can you say Evaporation?'",
+        "studentsOutput": "👥 Students: 'Evaporation! It goes up!'",
+        "justification": "💡 设计意图：利用视觉辅助工具直观呈现抽象概念，降低认知难度。"
+      },
+      {
+        "step": "第三步：活动：标记循环 (Activity: Label the Cycle)",
+        "duration": 10,
+        "teachersTalk": "🗣️ Teacher: 'Now, you are scientists! Put the stickers on the correct place. Where does the rain go?'",
+        "studentsOutput": "👥 Students: 'Precipitation is here! Collection is at the bottom.'",
+        "justification": "💡 设计意图：通过动手操作强化记忆，检查对核心概念的理解。"
+      },
+      {
+        "step": "第四步：巩固练习 (Practice: Role Play)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Act out being a water drop!'",
+        "studentsOutput": "👥 Students: (Acting out)",
+        "justification": "💡 设计意图：巩固知识。"
+      },
+      {
+        "step": "第五步：小组分享 (Group Sharing)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Share your water drop story with your partner.'",
+        "studentsOutput": "👥 Students: (Sharing short stories in pairs)",
+        "justification": "💡 设计意图：通过同伴交流促进语言输出与反思。"
+      },
+      {
+        "step": "第六步：绘制流程图 (Create a Flow Chart)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Draw the water cycle in your notebook and label each stage.'",
+        "studentsOutput": "👥 Students: (Drawing and labeling evaporation, condensation, precipitation)",
+        "justification": "💡 设计意图：通过图示整理知识结构，帮助学生形成整体表征。"
+      },
+      {
+        "step": "第七步：知识测查 (Quick Check)",
+        "duration": 3,
+        "teachersTalk": "🗣️ Teacher: 'Answer these quick questions: What is evaporation? What is precipitation?'",
+        "studentsOutput": "👥 Students: (Answering in short sentences)",
+        "justification": "💡 设计意图：通过快速问答检验学习成效，及时查漏补缺。"
+      },
+      {
+        "step": "第八步：总结：水循环之歌 (Wrap-up: Water Cycle Song)",
+        "duration": 2,
+        "teachersTalk": "🗣️ Teacher: 'Let's sing together! Up and down, round and round!'",
+        "studentsOutput": "👥 Students: (Singing) 'Water goes up, water comes down...'",
+        "justification": "💡 设计意图：以韵律歌谣巩固新知，在愉快的氛围中结束课程。"
+      }
+    ]
+  },
+  {
+    "title": "健康的习惯 (Healthy Habits)",
+    "grade": "Grade 3",
+    "duration": 45,
+    "teachingPreparation": {
+      "objectives": ["Identify healthy foods.", "Express preferences."],
+      "keyWords": ["Healthy", "Unhealthy", "I like...", "You should..."],
+      "sentenceStructures": "I like... / You should...",
+      "teachingAids": "Food cards, Flashcards, Food items",
+      "studentAnalysis": "Grade 3 students. Focus on daily habits.",
+      "duration": 45,
+      "audienceAnalysis": [
+        { 
+          "type": "general",
+          "description": "Analysis for 8-9 year old elementary students.",
+          "ageRange": "8-9", 
+          "proficiency": "Elementary", 
+          "learningStyle": "Visual",
+          "priorKnowledge": "Basic food names",
+          "challenges": "Distinguishing healthy/unhealthy"
+        }
+      ]
+    },
+    "procedures": [
+      {
+        "step": "第一步：头脑风暴 (Brainstorming)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'What makes you strong? Shout it out!'",
+        "studentsOutput": "👥 Students: 'Apples! Running! Sleeping!'",
+        "justification": "💡 设计意图：激活旧知，引入主题。"
+      },
+      {
+        "step": "第二步：词汇学习 (Vocabulary)",
+        "duration": 10,
+        "teachersTalk": "🗣️ Teacher: 'Is this healthy? Yes or No?'",
+        "studentsOutput": "👥 Students: 'Yes! No!'",
+        "justification": "💡 设计意图：明确核心概念分类。"
+      },
+      {
+        "step": "第三步：游戏 (Game)",
+        "duration": 10,
+        "teachersTalk": "🗣️ Teacher: 'Stand up if it's healthy!'",
+        "studentsOutput": "👥 Students: (Action)",
+        "justification": "💡 设计意图：通过肢体活动加深记忆。"
+      },
+      {
+        "step": "第四步：小组讨论 (Group Discussion)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Discuss your favorite food.'",
+        "studentsOutput": "👥 Students: (Discussing)",
+        "justification": "💡 设计意图：口语练习。"
+      },
+      {
+        "step": "第五步：搭配句型操练 (Sentence Drills)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Use \"You should...\" to give advice to your partner.'",
+        "studentsOutput": "👥 Students: 'You should eat more vegetables.'",
+        "justification": "💡 设计意图：通过句型操练强化功能句式的运用。"
+      },
+      {
+        "step": "第六步：情景对话 (Role Play)",
+        "duration": 5,
+        "teachersTalk": "🗣️ Teacher: 'Act out a short dialogue between a doctor and a student.'",
+        "studentsOutput": "👥 Students: (Performing role play using target language.)",
+        "justification": "💡 设计意图：在情境中综合运用词汇与句型。"
+      },
+      {
+        "step": "第七步：健康计划书写 (Healthy Plan Writing)",
+        "duration": 3,
+        "teachersTalk": "🗣️ Teacher: 'Write three things you will do to stay healthy.'",
+        "studentsOutput": "👥 Students: (Writing short bullet points.)",
+        "justification": "💡 设计意图：通过书面输出帮助学生内化健康习惯。"
+      },
+      {
+        "step": "第八步：反思与分享 (Reflection & Sharing)",
+        "duration": 2,
+        "teachersTalk": "🗣️ Teacher: 'What will you do this week?'",
+        "studentsOutput": "👥 Students: 'I will eat apples.'",
+        "justification": "💡 设计意图：将学习延伸至生活实践，总结课堂收获。"
+      }
+    ]
+  }
+]

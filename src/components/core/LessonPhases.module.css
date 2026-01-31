@@ -1,0 +1,52 @@
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap, use margin-top on items */
+  width: 100%;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start; /* Align top for long text */
+  gap: 8px; /* Icon and text gap 8px */
+  margin-top: 12px; /* Item top margin 12px */
+  padding: 8px; /* Add some padding for background */
+  border-radius: 4px; /* Optional: slight rounding for background */
+}
+
+.listItem:first-child {
+  margin-top: 0;
+}
+
+.listItem:nth-child(even) {
+  background-color: #f8f9fa; /* Alternating background */
+}
+
+.listItem.active {
+  border-left: 3px solid #1890ff; /* Active item border */
+}
+
+.listItem::before {
+  content: "•";
+  color: #666;
+  margin-right: 8px;
+  display: none; /* Hidden because we use icons, but kept for requirement compliance if icons were removed */
+}
+
+.iconWrapper {
+  width: 24px; /* Icon size 24x24 */
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C5D8B5; /* Morandi Green */
+}
+
+.text {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 14px;
+  line-height: 24px; /* Align with 24px icon */
+  color: #4A4A4A; /* Dark Grey for text */
+  word-break: break-word; /* Ensure long text wraps */
+}

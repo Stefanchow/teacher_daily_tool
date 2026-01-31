@@ -1,0 +1,10 @@
+{
+  "vocabulary": ["mountain", "river", "tree", "cloud", "sky"],
+  "vocabulary_extensions": ["peak", "stream", "forest", "overcast", "horizon"],
+  "sentences": [
+    "There is a high mountain in the distance.",
+    "The river flows through the forest."
+  ],
+  "suggestedTopic": "Nature and Landscapes",
+  "grammar_points": ["There is / There are", "Prepositions of place"]
+}
