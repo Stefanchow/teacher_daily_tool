@@ -13,7 +13,7 @@ export interface UserSettingsState {
   // lessonStyle removed per request
   
   // Language Settings
-  uiLanguage: 'zh' | 'en' | 'fr';      // Interface language
+  uiLanguage: 'zh' | 'en';      // Interface language
   outputLanguage: 'en' | 'bilingual';  // Content generation language (kept for compatibility)
 
   // Visual & Interaction
@@ -101,7 +101,7 @@ const userSettingsSlice = createSlice({
     setTeachingStage: (state, action: PayloadAction<'primary' | 'middle' | 'high'>) => {
       state.teachingStage = action.payload;
     },
-    setUiLanguage: (state, action: PayloadAction<'zh' | 'en' | 'fr'>) => {
+    setUiLanguage: (state, action: PayloadAction<'zh' | 'en'>) => {
       state.uiLanguage = action.payload;
     },
     setOutputLanguage: (state, action: PayloadAction<'en' | 'bilingual'>) => {

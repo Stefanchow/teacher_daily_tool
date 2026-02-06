@@ -4,6 +4,54 @@
 
 本 Skill 总结了在教育类 Web 应用中开发 React 组件的常用模式、交互设计和最佳实践。基于 `AIPaperGenerator.tsx` 及类似教育组件的实现经验。
 
+## 核心数据类型
+
+### 教案数据结构 (LessonPlan)
+
+```typescript
+interface LessonPlan {
+  title_zh: string;           // 中文标题
+  title_en: string;           // 英文标题
+  grade: string;              // 年级 (如：Grade 3)
+  duration: number;           // 教学时长（分钟）- 不包含作业时间
+  teachingMethod: string;     // 教学法 (PPP/PWP/TBLT/TTT/project-based)
+  
+  teachingPreparation: {
+    objectives_zh: string[];      // 中文教学目标
+    objectives_en: string[];      // 英文教学目标
+    keyWords_zh: string[];        // 中文核心词汇
+    keyWords_en: string[];        // 英文核心词汇
+    sentenceStructures_zh: string[];  // 中文句型
+    sentenceStructures_en: string[];  // 英文句型
+    teachingAids_zh: string;      // 中文教具
+    teachingAids_en: string;      // 英文教具
+    studentAnalysis_zh: string;   // 中文学情分析
+    studentAnalysis_en: string;   // 英文学情分析
+    audienceAnalysis?: {          // 受众细分分析
+      type: string;               // 类型 (如：visual, auditory)
+      description: string;        // 描述
+      ageRange: string;           // 年龄段
+      proficiency: string;        // 熟练度
+      learningStyle: string;      // 学习风格
+    }[];
+  };
+  
+  procedures: {
+    title_zh: string;         // 中文步骤标题
+    title_en: string;         // 英文步骤标题
+    content_zh: string;       // 中文内容 (Markdown格式)
+    content_en: string;       // 英文内容 (Markdown格式)
+    duration: number;         // 时长（分钟）
+  }[];
+}
+```
+
+### 活动数据结构 (ActivityPlan)
+
+活动使用与教案相同的数据结构，但 `functionType` 为 `'activity'`：
+- 活动步骤数量：**恰好6个**（2词汇+2句型+1语法+1产出）或用户指定数量
+- 活动内容描述**游戏规则和互动流程**，而非教学步骤
+
 ## 设计原则
 
 ### 1. 渐进式配置
@@ -455,3 +503,26 @@ describe('SegmentedControl', () => {
   });
 });
 ```
+
+## 学科指令层
+
+本 Skill 包含按学科细分的指令文件：
+
+### 教案生成指令
+- `INSTRUCTIONS-english-lesson.md` - 英语教案（✅ 完整）
+- `INSTRUCTIONS-chinese-lesson.md` - 语文教案（📝 待优化）
+- `INSTRUCTIONS-math-lesson.md` - 数学教案（📝 待优化）
+
+### 活动生成指令
+- `INSTRUCTIONS-english-activity.md` - 英语活动（✅ 完整）
+- `INSTRUCTIONS-chinese-activity.md` - 语文活动（📝 待优化）
+- `INSTRUCTIONS-math-activity.md` - 数学活动（📝 待优化）
+
+**使用说明**：
+- 英语板块已完成详细指令，严格遵循项目中的提示词构建器规范
+- 语文和数学板块为占位文件，待后续教学法优化后更新
+
+## 版本记录
+
+- v1.0 - 基础组件开发指南
+- v1.1 - 添加核心数据类型定义和学科指令层说明

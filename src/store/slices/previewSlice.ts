@@ -8,14 +8,14 @@ interface PreviewState {
   currentPage: number;
   totalPages: number;
   isExporting: boolean;
-  language: 'zh' | 'en' | 'fr';
+  language: 'zh' | 'en';
 }
 
-const getInitialLanguage = (): 'zh' | 'en' | 'fr' => {
+const getInitialLanguage = (): 'zh' | 'en' => {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const lang = localStorage.getItem('language');
-      if (lang === 'zh' || lang === 'en' || lang === 'fr') {
+      if (lang === 'zh' || lang === 'en') {
         return lang;
       }
     }
@@ -56,7 +56,7 @@ const previewSlice = createSlice({
     setIsExporting(state, action: PayloadAction<boolean>) {
       state.isExporting = action.payload;
     },
-    setLanguage(state, action: PayloadAction<'zh' | 'en' | 'fr'>) {
+    setLanguage(state, action: PayloadAction<'zh' | 'en'>) {
       state.language = action.payload;
     },
   },

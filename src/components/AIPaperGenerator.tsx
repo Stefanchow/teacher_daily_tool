@@ -79,34 +79,55 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
 
   // Dynamic Title Logic
   const headerTitle = useMemo(() => {
-    let titlePrefix = displayTitle?.trim() || '';
-    // Remove "度" from "学年度" if present
-    titlePrefix = titlePrefix.replace(/学年度/g, '学年');
-    // If prefix is just a hyphen or empty year like "- 学年", clean it
-    if (titlePrefix.startsWith('- 学年') || titlePrefix === '- 学年') {
-       titlePrefix = '';
-    }
-    // Remove standalone " - 学年" if user entered no years
-    titlePrefix = titlePrefix.replace(/^[^\s]*\s?-\s?学年/, '');
+    // Parse theme components from displayTitle
+    let loc = '';
+    let scp = '';
+    let start = '';
+    let end = '';
 
-    // Determine Type String
+    if (displayTitle) {
+      // Support both "学年" and "学年度" and handle empty years
+      // Format from updateTheme: `${loc}${scp}${start}-${end}学年`
+      const match = displayTitle.match(/^(.*?)(市|区)(.*)-(.*)学年度?/);
+      if (match) {
+        loc = match[1] || '';
+        scp = match[2] || '';
+        start = match[3] || '';
+        end = match[4] || '';
+      }
+    }
+    
+    // Build title only with available components
+    let titleParts: string[] = [];
+    
+    // Add location + scope if location exists
+    if (loc.trim()) {
+      titleParts.push(`${loc}${scp}`);
+    }
+    
+    // Add year range if both years exist
+    if (start.trim() && end.trim()) {
+      titleParts.push(`${start}-${end}学年`);
+    }
+    
+    // Add semester and exam type
     let typeStr = '';
     if (paperType === 'midterm') typeStr = '期中';
     else if (paperType === 'final') typeStr = '期末';
-
-    if (titlePrefix) {
-      // If the prefix looks like the standard format (ends with 学年), append semester and type
-      if (titlePrefix.endsWith('学年')) {
-        return `${titlePrefix} ${semester}${typeStr}质量监测`;
-      }
-      return titlePrefix.endsWith('质量监测') ? titlePrefix : `${titlePrefix}质量监测`;
+    else if (paperType === 'monitor') typeStr = '';
+    
+    if (semester || typeStr) {
+      titleParts.push(`${semester}${typeStr}质量监测`);
     }
-
-    if (paperType === 'midterm') return `${semester}期中质量监测`;
-    if (paperType === 'final') return `${semester}期末质量监测`;
-    if (paperType === 'monitor') return t('paper_header_title_monitor', { semester });
-    return `${semester}期末质量监测`;
-  }, [displayTitle, t, semester, paperType]);
+    
+    // If no valid parts, return default based on paper type
+    if (titleParts.length === 0) {
+      // Fallback: just show semester + type, avoid placeholders
+      return `${semester}质量监测`;
+    }
+    
+    return titleParts.join('');
+  }, [displayTitle, semester, paperType, t]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -214,39 +235,56 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
     // 1. Grid Layout (Sequencing / Look & Write)
     if (qTypeMatch === '听音图片排序' || qTypeMatch === '看图写词') {
       return (
-        <div className="flex flex-row justify-between mt-4 px-2 font-[Arial]">
-          {section.questions.map((q: any, i: number) => {
-            globalQuestionIndex++;
-            return (
-              <div key={i} className="flex flex-col items-center w-[18%]">
-                {/* Image Box */}
-                <div className="w-full aspect-square border border-black mb-2 relative flex items-center justify-center bg-transparent">
-                   {/* Label A-E */}
-                   <span className="absolute top-0 right-0 bg-black text-white text-xs px-1 font-[Arial]">
-                      {String.fromCharCode(65 + i)}
-                   </span>
-                </div>
-                {/* Answer Area */}
-                <div className="w-full">
-                  {qTypeMatch === '看图写词' ? (
-                     <div className="w-full h-12 relative flex flex-col justify-between py-1">
-                        {/* 4 Lines */}
-                        <div className="w-full border-b border-black opacity-60"></div>
-                        <div className="w-full border-b border-pink-400 opacity-60"></div>
-                        <div className="w-full border-b border-pink-400 opacity-60"></div>
-                        <div className="w-full border-b border-black opacity-60"></div>
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 text-sm font-[Arial] font-bold">{globalQuestionIndex}.</span>
-                     </div>
-                  ) : (
-                     <div className="text-center font-[Arial]">
-                        <span className="font-bold mr-1">{globalQuestionIndex}.</span>
-                        <span className="inline-block w-12 border-b border-black"></span>
-                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="mt-4 px-2 font-[Arial]">
+          {qTypeMatch === '听音图片排序' ? (
+            // 听音图片排序：5个图片框一排，下面有横线和题号
+            <div className="flex flex-row justify-between">
+              {section.questions.map((q: any, i: number) => {
+                globalQuestionIndex++;
+                return (
+                  <div key={i} className="flex flex-col items-center w-[18%]">
+                    {/* Image Box */}
+                    <div className="w-full aspect-square border border-black mb-2 relative flex items-center justify-center bg-transparent">
+                       {/* Label A-E */}
+                       <span className="absolute top-0 right-0 bg-black text-white text-xs px-1 font-[Arial]">
+                          {String.fromCharCode(65 + i)}
+                       </span>
+                    </div>
+                    {/* Answer Area with Question Number - 括号内空4字符 */}
+                    <div className="w-full text-center">
+                       <span className="font-bold mr-1">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
+                       <span className="inline-block w-12 border-b border-black"></span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            // 看图写词：原有布局
+            <div className="flex flex-row justify-between">
+              {section.questions.map((q: any, i: number) => {
+                globalQuestionIndex++;
+                return (
+                  <div key={i} className="flex flex-col items-center w-[18%]">
+                    {/* Image Box */}
+                    <div className="w-full aspect-square border border-black mb-2 relative flex items-center justify-center bg-transparent">
+                       <span className="absolute top-0 right-0 bg-black text-white text-xs px-1 font-[Arial]">
+                          {String.fromCharCode(65 + i)}
+                       </span>
+                    </div>
+                    {/* Answer Area with 4 Lines */}
+                    <div className="w-full h-12 relative flex flex-col justify-between py-1">
+                       <div className="w-full border-b border-black opacity-60"></div>
+                       <div className="w-full border-b border-pink-400 opacity-60"></div>
+                       <div className="w-full border-b border-pink-400 opacity-60"></div>
+                       <div className="w-full border-b border-black opacity-60"></div>
+                       <span className="absolute left-0 top-1/2 -translate-y-1/2 text-sm font-[Arial] font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       );
     }
@@ -266,8 +304,8 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                    globalQuestionIndex++;
                    // Replace underscores or just append blank
                    const content = q.content.includes('_') 
-                      ? q.content.replace(/_+/g, `____ ${globalQuestionIndex} ____`) 
-                      : `${globalQuestionIndex}. ${q.content} ______`;
+                      ? q.content.replace(/_+/g, `____ (&nbsp;&nbsp;&nbsp;&nbsp;)${globalQuestionIndex} ____`) 
+                      : `(&nbsp;&nbsp;&nbsp;&nbsp;)${globalQuestionIndex}. ${q.content} ______`;
                    // Clean unwanted text
                    const cleanContent = content.replace(/image\s*options?/gi, '');
                    return (
@@ -291,7 +329,7 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                 return (
                    <div key={i}>
                       <div className="mb-2 text-base">
-                         <span className="font-bold mr-2">{globalQuestionIndex}.</span>
+                         <span className="font-bold mr-2">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
                          {cleanContent}
                       </div>
                       <div className="w-full border-b border-black h-px"></div>
@@ -342,8 +380,8 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
            return (
               <div key={i} className={styles.question}>
                  <div className="flex gap-1 items-start">
-                    {showBracket && <span className="mr-2 font-normal font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</span>}
-                    <span className="font-bold min-w-[1.5em] font-[Arial]">{globalQuestionIndex}.</span>
+                    {showBracket && <span className="mr-2 font-normal font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;)</span>}
+                    <span className="font-bold min-w-[1.5em] font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
                     
                     <div className="flex-1">
                       <div className="font-[Arial]" dangerouslySetInnerHTML={{__html: cleanContent}} />
@@ -520,7 +558,7 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                     return (
                       <div key={qIdx} className={styles.question}>
                         <div className="flex gap-2 items-start">
-                          <span className="font-bold min-w-[1.5em] font-[Arial] pt-1">{globalQuestionIndex}.</span>
+                          <span className="font-bold min-w-[1.5em] font-[Arial] pt-1">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
                           <div className="flex-1">
                              {isMock ? (
                                 <div className="border border-dashed border-gray-300 p-2 text-gray-400 text-sm">{cleanContent}</div>
@@ -620,7 +658,7 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                     return (
                       <div key={qIdx} className={styles.question}>
                         <div className="flex gap-2 items-start">
-                          <span className="font-bold min-w-[1.5em] font-[Arial] pt-1">{globalQuestionIndex}.</span>
+                          <span className="font-bold min-w-[1.5em] font-[Arial] pt-1">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
                           <div className="flex-1">
                              {isMock ? (
                                 <div className="border border-dashed border-gray-300 p-2 text-gray-400 text-sm">{cleanContent}</div>
@@ -679,12 +717,12 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
           {/* Appendix: Listening Materials & Answer Key */}
           {!isMock && (
             <div className="break-before-page mt-12 pt-8 border-t-2 border-dashed border-gray-300 font-[SongTi]" style={{ pageBreakBefore: 'always' }}>
-                <h1 className="text-center text-xl font-bold mb-8 font-[SimHei]">Listening Materials & Answer Key</h1>
+                <h1 className="text-center text-xl font-bold mb-8 font-[SimHei]">听力材料及参考答案</h1>
                 
                 {/* Listening Scripts */}
                 {listeningSections.length > 0 && (
                   <div className="mb-8">
-                    <h2 className="font-bold text-lg mb-4 border-l-4 border-black pl-2">Listening Scripts</h2>
+                    <h2 className="font-bold text-lg mb-4 border-l-4 border-black pl-2">一、听力材料</h2>
                     {listeningSections.map((section, i) => (
                        <div key={i} className="mb-4">
                           <div className="font-bold mb-2 font-[SimHei]">{toChineseNum(i+1)}、{section.title}</div>
@@ -703,8 +741,8 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                 )}
 
                 {/* Answer Key */}
-                <div>
-                   <h2 className="font-bold text-lg mb-4 border-l-4 border-black pl-2">Answer Key</h2>
+                <div className="mb-8">
+                   <h2 className="font-bold text-lg mb-4 border-l-4 border-black pl-2">二、参考答案</h2>
                    <div className="grid grid-cols-5 gap-4">
                       {[...listeningSections, ...writingSections].map((section, i) => (
                          <div key={i} className="mb-2">
@@ -712,6 +750,26 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
                             <div className="text-sm pl-2 font-[Arial]">
                                {section.questions.map((q, j) => (
                                   <span key={j} className="mr-2">{j+1}. {q.answer || (q.options ? String.fromCharCode(65 + (Math.floor(Math.random() * q.options.length))) : 'T')}</span>
+                               ))}
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+
+                {/* Analysis */}
+                <div>
+                   <h2 className="font-bold text-lg mb-4 border-l-4 border-black pl-2">三、解析</h2>
+                   <div className="space-y-4">
+                      {[...listeningSections, ...writingSections].map((section, i) => (
+                         <div key={i} className="mb-4">
+                            <div className="font-bold text-sm mb-2 font-[SimHei]">{toChineseNum(i+1)}、{section.title.split(' ')[0]}</div>
+                            <div className="text-sm pl-2 font-[Arial] space-y-1">
+                               {section.questions.map((q, j) => (
+                                  <div key={j} className="mb-1">
+                                     <span className="font-bold mr-1">{j+1}.</span>
+                                     <span className="text-gray-700">{q.analysis || '略'}</span>
+                                  </div>
                                ))}
                             </div>
                          </div>
@@ -1041,8 +1099,8 @@ export const AIPaperGenerator: React.FC = () => {
   // Theme Composition State
   const [themeLocation, setThemeLocation] = useState('');
   const [themeScope, setThemeScope] = useState('区');
-  const [themeYearStart, setThemeYearStart] = useState(new Date().getFullYear().toString());
-  const [themeYearEnd, setThemeYearEnd] = useState((new Date().getFullYear() + 1).toString());
+  const [themeYearStart, setThemeYearStart] = useState('');
+  const [themeYearEnd, setThemeYearEnd] = useState('');
 
   // Initialize local state from Redux theme if applicable
   useEffect(() => {

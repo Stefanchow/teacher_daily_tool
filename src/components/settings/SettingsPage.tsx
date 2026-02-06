@@ -365,11 +365,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
             {/* Language Settings (i18n) */}
             <div>
               <label className="block text-base font-medium mb-4 text-gray-500 dark:text-gray-400">{t('settings_default_language')}</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { id: 'zh', label: '简体中文' },
-                  { id: 'en', label: 'English' },
-                  { id: 'fr', label: 'Français' }
+                  { id: 'en', label: 'English' }
                 ].map((lang) => (
                   <button
                     key={lang.id}

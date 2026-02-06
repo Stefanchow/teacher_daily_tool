@@ -11,11 +11,10 @@ export const LanguageSegmentedControl: React.FC = () => {
 
   const languages = [
     { id: 'zh', label: '中文' },
-    { id: 'en', label: 'English' },
-    { id: 'fr', label: 'Français' }
+    { id: 'en', label: 'English' }
   ];
 
-  const handleLanguageChange = (langId: 'zh' | 'en' | 'fr') => {
+  const handleLanguageChange = (langId: 'zh' | 'en') => {
     // Sync both states as requested
     dispatch(setUiLanguage(langId));
     dispatch(setLanguage(langId));

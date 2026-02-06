@@ -90,27 +90,10 @@ const LABELS = {
     justification: 'Justification (设计意图)',
     studentAnalysis: 'Student Analysis (学情分析)',
     sentenceStructures: 'Sentence Structures (句型结构)'
-  },
-  fr: {
-    title: 'Lesson Plan (Plan de Leçon)',
-    grade: 'Grade (Niveau)',
-    duration: 'Duration (Durée)',
-    teachingPreparation: 'Teaching Preparation (Préparation)',
-    objectives: 'Objectives (Objectifs)',
-    keyWords: 'Key Words (Mots Clés)',
-    teachingAids: 'Teaching Aids (Matériel)',
-    procedures: 'Procedures (Déroulement)',
-    step: 'Step (Étape)',
-    time: 'Time (Temps)',
-    teacherActivity: 'Teacher Activity (Activité Enseignant)',
-    studentActivity: 'Student Activity (Activité Élève)',
-    justification: 'Justification (Justification)',
-    studentAnalysis: 'Student Analysis (Analyse Élève)',
-    sentenceStructures: 'Sentence Structures (Structures de Phrases)'
   }
 };
 
-function getLabels(lang: 'en' | 'zh' | 'fr') {
+function getLabels(lang: 'en' | 'zh') {
   return LABELS[lang] || LABELS.en;
 }
 
@@ -120,7 +103,7 @@ function formatTitle(title: string, grade?: string): string {
   return title.replace(/[*_#]/g, '');
 }
 
-async function generateDocxBlob(plan: LessonPlan, language: 'en' | 'zh' | 'fr'): Promise<Blob> {
+async function generateDocxBlob(plan: LessonPlan, language: 'en' | 'zh'): Promise<Blob> {
   try {
     const labels = getLabels(language);
     const titleText = language === 'zh' ? plan.title_zh : plan.title_en;
@@ -364,7 +347,7 @@ async function generateDocxBlob(plan: LessonPlan, language: 'en' | 'zh' | 'fr'):
   }
 }
 
-function generateLessonPlanHtml(plan: LessonPlan, language: 'en' | 'zh' | 'fr', theme: ExportTheme, mode: 'full' | 'scoped' = 'full'): string {
+function generateLessonPlanHtml(plan: LessonPlan, language: 'en' | 'zh', theme: ExportTheme, mode: 'full' | 'scoped' = 'full'): string {
   const labels = getLabels(language);
   const titleText = language === 'zh' ? plan.title_zh : plan.title_en;
   const title = formatTitle(titleText || labels.title);
@@ -448,7 +431,7 @@ function generateLessonPlanHtml(plan: LessonPlan, language: 'en' | 'zh' | 'fr', 
   `;
 }
 
-async function generatePdfBlobFromPlan(plan: LessonPlan, language: 'en' | 'zh' | 'fr'): Promise<Blob> {
+async function generatePdfBlobFromPlan(plan: LessonPlan, language: 'en' | 'zh'): Promise<Blob> {
   const theme = getExportTheme();
   // Use scoped mode to prevent global style leaks and ensure correct element selection
   const html = generateLessonPlanHtml(plan, language, theme, 'scoped');
@@ -502,7 +485,7 @@ async function generatePdfBlobFromPlan(plan: LessonPlan, language: 'en' | 'zh' |
 }
 
 export const downloadService = {
-  async downloadDocx(plan: LessonPlan, language: 'en' | 'zh' | 'fr' = 'zh') {
+  async downloadDocx(plan: LessonPlan, language: 'en' | 'zh' = 'zh') {
     try {
       const blob = await generateDocxBlob(plan, language);
       const titleText = language === 'zh' ? plan.title_zh : plan.title_en;
@@ -514,7 +497,7 @@ export const downloadService = {
     }
   },
 
-  async downloadPdf(plan: LessonPlan, language: 'en' | 'zh' | 'fr' = 'zh') {
+  async downloadPdf(plan: LessonPlan, language: 'en' | 'zh' = 'zh') {
     try {
       // Try server first for high-quality PDF
       const titleText = language === 'zh' ? plan.title_zh : plan.title_en;
@@ -708,7 +691,7 @@ export const downloadService = {
     return false;
   },
 
-  async downloadBatchDocx(plans: LessonPlan[], language: 'en' | 'zh' | 'fr' = 'zh', onProgress?: (current: number, total: number) => void) {
+  async downloadBatchDocx(plans: LessonPlan[], language: 'en' | 'zh' = 'zh', onProgress?: (current: number, total: number) => void) {
     let count = 0;
     const usedNames = new Set<string>();
     const total = plans.length;
@@ -756,7 +739,7 @@ export const downloadService = {
     }
   },
 
-  async downloadBatchPdf(plans: LessonPlan[], language: 'en' | 'zh' | 'fr' = 'zh', onProgress?: (current: number, total: number) => void) {
+  async downloadBatchPdf(plans: LessonPlan[], language: 'en' | 'zh' = 'zh', onProgress?: (current: number, total: number) => void) {
     let count = 0;
     const usedNames = new Set<string>();
     const total = plans.length;

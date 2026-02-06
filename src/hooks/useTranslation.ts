@@ -9,7 +9,7 @@ export const useTranslation = () => {
   const currentTranslations = translations[uiLanguage] || translations['zh'];
 
   const t = (key: TranslationKey, params?: Record<string, string | number>) => {
-    // Cast to allow access even if key is missing in specific language file (e.g. fr)
+    // Cast to allow access even if key is missing in specific language file
     const val = (currentTranslations as Record<string, string>)[key];
     let text = val || translations['zh'][key] || key;
     

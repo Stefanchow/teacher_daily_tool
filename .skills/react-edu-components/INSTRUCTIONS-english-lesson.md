@@ -21,7 +21,7 @@ interface LessonPlanMeta {
   title_zh: string;       // 中文标题
   title_en: string;       // 英文标题
   grade: string;          // 年级（如：Grade 3）
-  duration: number;       // 课时长度（分钟）
+  duration: number;       // 教学时长（分钟）- 不包含作业时间
   teachingMethod: string; // 教学法（PPP/PWP/TBLT/TTT/project-based）
 }
 ```
@@ -49,6 +49,15 @@ interface TeachingPreparation {
   // 学情分析（双语）
   studentAnalysis_zh: string;
   studentAnalysis_en: string;
+  
+  // 受众细分分析（可选）
+  audienceAnalysis?: {
+    type: string;         // 类型：visual(视觉型)/auditory(听觉型)/kinesthetic(动觉型)
+    description: string;  // 描述
+    ageRange: string;     // 年龄段
+    proficiency: string;  // 熟练度
+    learningStyle: string;// 学习风格
+  }[];
 }
 ```
 
@@ -137,9 +146,9 @@ interface ProcedureStep {
 | **教师行为** | **Teacher's Actions** | 教师的具体操作指令 |
 | **教师话术** | **Teacher's Talk** | 教师说的话（必须生动幽默） |
 | **学生反应** | **Students' Responses** | 预期学生的行为和回应 |
-| **关键提问** | **Key Questions** | 本环节的核心问题 |
-| **及时反馈** | **Timely Feedback** | 教师如何给予反馈 |
 | **设计意图** | **Design Rationale** | 为什么这样设计（含心理学依据） |
+
+**注意**：根据实际代码验证，以上4个字段是核心要求。关键提问和及时反馈可根据具体内容灵活添加。
 
 **示例**：
 ```markdown
@@ -149,14 +158,24 @@ interface ProcedureStep {
 
 **学生反应**：学生观看视频，尝试说出看到的人物。
 
-**关键提问**：What is the relationship between them?
-
-**及时反馈**：肯定学生的回答，引导学生使用目标词汇。
-
 **设计意图**：通过视频激活学生的背景知识，激发学习兴趣。根据认知心理学，多感官输入有助于信息编码。
 ```
 
-### 5. 创意引擎：流派化架构 (Genre-Based Architecture)
+### 5. 时长分配规则
+
+```typescript
+// 教案总时长计算规则
+const teachingDuration = params.duration || 45;  // 教学时长（用户输入）
+const homeworkDuration = 2;                       // 作业时长（固定）
+const totalDuration = teachingDuration + homeworkDuration;  // 总时长
+```
+
+- **教学步骤**：所有教学步骤的时长之和必须等于 `teachingDuration`
+- **作业步骤**：最后一步必须是作业，固定为 **2分钟**
+- **作业是额外的**：不包含在教学时长内
+- **作业格式**：必须是分层作业（Foundation/Improvement/Challenge）
+
+### 6. 创意引擎：流派化架构 (Genre-Based Architecture)
 
 系统会随机选择一种流派来设计课程：
 
@@ -170,27 +189,27 @@ interface ProcedureStep {
 
 **约束**：整个课程流程必须基于选定的流派设计。
 
-### 6. 必须融合的教学要素
+### 7. 必须融合的教学要素
 
-#### 6.1 CLIL (内容语言融合)
+#### 7.1 CLIL (内容语言融合)
 - 必须在教学过程中融入**跨学科**内容（科学、艺术、历史等）
 - 必须融入**跨文化**内容
 
-#### 6.2 KWL 模型（作为思维流程，非固定表格）
+#### 7.2 KWL 模型（作为思维流程，非固定表格）
 不要机械地创建单独的KWL表格，而是通过活动自然融入：
 
 - **K (Know - 激活旧知)**：在导入/热身环节，通过提问、小任务或讨论唤起学生已有知识
 - **W (Want - 想知)**：在早期环节，通过目标设定或引导性问题，引出学生想了解的内容
 - **L (Learned - 新知)**：在总结/结束环节，通过复盘、分享或小结活动，帮助学生反思学到的内容
 
-### 7. 创意铁律 (严禁项)
+### 8. 创意铁律 (严禁项)
 
 - **严禁 "Listen and repeat"**：改为 "Echo mimicry (影子跟读)" 或 "角色配音"
 - **严禁 "Play a game"**：必须使用具体创意游戏名（如 "Word Bomb", "Mafia"）
 - **严禁 "Read together"**：改为 "Running dictation" 或 "Reader's Theater"
 - **非确定性**：即使参数相同，严禁复用超过20%的描述
 
-### 8. 年级段精准调优
+### 9. 年级段精准调优
 
 #### 小学段 (Grades 1-3)
 - 增加视觉冲击力和肢体反馈（TPR）
@@ -212,12 +231,6 @@ interface ProcedureStep {
 - 现实世界连接
 - 使用"苏格拉底提问法"
 
-### 9. 时间分配规则
-
-- **总结与作业（最后一步）**：固定为 **3分钟**
-- **其余时间**：合理分配到前面的步骤
-- **热身环节**：不超过总时长的10%
-
 ### 10. 归纳式教学原则
 
 #### 词汇教学
@@ -228,85 +241,108 @@ interface ProcedureStep {
 - **严禁直接展示或机械操练句型**
 - 遵循"语境中呈现 → 学生觉察 → 引导推导 → 习得"的路径
 
+### 11. 内容连贯性要求
+
+- **过渡必须基于深层内容逻辑**，而非仅仅是过渡词
+- 前一步骤的产出必须是下一步骤的直接输入或情境
+- 确保活动之间有连续的叙事流程，逻辑上相互构建
+
+**示例**：
+```
+不好："Now let's play a game."（只有过渡词，没有内容关联）
+好："Using the vocabulary map we just created, let's now play a word association game to reinforce these connections."
+```
+
 ## 生成提示词模板
 
 ```markdown
 # Role
-你是一位经验丰富的英语教师（拥有CELTA/TESOL证书）。请为主题："{topic}" 生成一份专业的、符合国际标准的教案。
+You are an expert ESL teacher trainer with CELTA and DELTA certifications.
 
-# 角色
-你是一位经验丰富的英语教师（拥有CELTA/TESOL证书）。请为主题："{topic}" 生成一份专业的、符合国际标准的教案。
+# Task
+Create a detailed lesson plan based on the following constraints.
 
-# 🚀 创意引擎：流派化架构
-**本次随机抽选流派**：{selectedGenre.name}
-**流派描述**：{selectedGenre.desc}
-**核心指令**：你必须以此流派为核心架构设计整堂课的流程。
+# 🚀 Creative Engine: Genre-Based Architecture
+**Selected Genre**: {selectedGenre.name}
+**Description**: {selectedGenre.desc}
+**Constraint**: You MUST design the entire lesson flow based on this genre.
 
-# 🚫 创意铁律
-- 严禁 "Listen and repeat"、"Play a game"、"Read together"
-- 必须使用具体的创意活动名称
+# 🚫 Creative Constraints (Prohibited Items)
+- **NO "Listen and repeat"**: Use "Echo mimicry" or "Dubbing".
+- **NO "Play a game"**: Use specific creative names (e.g., "Word Bomb", "Mafia").
+- **NO "Read together"**: Use "Running dictation" or "Reader's Theater".
+- **Differentiation**: Even with same parameters, do NOT reuse >20% of descriptions.
 
-# 🎓 年级段精准调优
-- **当前年级**：{grade}
-- 根据该年级学生的心理特点和兴趣定制活动
+# 🎓 Grade-Level Optimization
+- **Primary**: Increase visual impact and TPR. Reduce boring grammar lectures.
+- **Middle**: Introduce social attributes and team competitions. Use psychological hooks.
+- **High**: Emphasize deep thinking, authentic expression, and real-world connections (Socratic Method).
 
-# 核心教学理念
-**教学法**：{methodology}
-{根据教学法描述具体流程}
+# Inputs
+- **Topic**: {topic}
+- **Grade/Level**: {grade}
+- **Duration**: {duration} minutes (teaching time, homework is extra)
+- **Methodology**: {method} (e.g., PPP, TBLT, PWP)
 
-# 已识别项目
-词汇：
-{words}
+# Content Supplementation Rule
+- If the provided words/sentences/grammar are empty or insufficient, you MUST AUTO-GENERATE suitable content relevant to the topic.
 
-句型：
-{sentences}
-
-语法：
-{grammar}
-
-# 要求
-1. **完整性**：必须包含所有JSON结构定义的部分
-2. **双语结构**：所有文本字段必须包含_zh和_en后缀
-3. **步骤数量**：必须包含10到15个详细的教学步骤
-4. **详细程度**：
-   - content_zh和content_en必须是详细的剧本式Markdown文本
-   - 必须包含：教师行为、教师话术、学生反应、关键提问、及时反馈、设计意图
-   - 教师话术必须生动幽默
-   - 设计意图必须包含心理学依据
-5. **必须融合的教学要素**：
-   - CLIL (内容语言融合)
-   - KWL 模型（作为思维流程，非固定表格）
-6. **时间分配**：总结与作业固定为3分钟
-7. **归纳式教学**：严禁直接讲解，必须遵循归纳式路径
+# Requirements
+1. **Objectives**: Use SWBAT format, specific and measurable.
+2. **Teaching Aids**: Prioritize REAL OBJECTS (realia) whenever possible.
+3. **Procedure**:
+   - Generate **10-15 detailed steps** that sum up to exactly {duration} minutes.
+   - For PWP: Break down Pre-While-Post into granular sub-tasks.
+   - Specify Interaction patterns (T-S, S-S, Pair, Group).
+   - Include vivid, humorous "Teacher's Talk" examples.
+   - Transitions must be based on DEEP CONTENT LOGIC.
+4. **Mandatory Methodological Elements**:
+   - **CLIL Integration**: Cross-Curricular and Cross-Cultural elements.
+   - **KWL Framework**: Embed K/W/L thinking naturally into activities.
+5. **Inductive Teaching**: 
+   - Vocabulary: Context → Notice → Deduce (NEVER direct translation)
+   - Sentences: Context → Notice → Deduce → Acquire (NEVER direct drilling)
+6. **Content Detail**: Each step MUST be STRICTLY at least 500 characters.
+7. **Homework**: MUST be the LAST step with EXACTLY 2 minutes duration (extra time).
+   - Format: Layered Homework (Foundation, Improvement, Challenge).
 
 # Output Format
-**必须返回纯JSON格式**，严禁包含任何Markdown格式标签或解释性文字。
+**STRICTLY RETURN PURE JSON ONLY**. NO Markdown formatting.
 
 # JSON Data Structure
 {
-  "title_zh": "教案标题",
-  "title_en": "Lesson Title",
+  "title_zh": "...",
+  "title_en": "...",
   "grade": "{grade}",
   "duration": {duration},
   "teachingMethod": "{method}",
   "teachingPreparation": {
-    "objectives_zh": ["目标1...", "目标2..."],
-    "objectives_en": ["Objective 1...", "Objective 2..."],
-    "keyWords_zh": ["词汇1", "词汇2"],
-    "keyWords_en": ["Word 1", "Word 2"],
-    "sentenceStructures_zh": ["句型1", "句型2"],
-    "sentenceStructures_en": ["Sentence 1", "Sentence 2"],
-    "teachingAids_zh": "PPT, 道具...",
-    "teachingAids_en": "PPT, Props...",
-    "studentAnalysis_zh": "分析...",
-    "studentAnalysis_en": "Analysis..."
+    "objectives_zh": ["..."],
+    "objectives_en": ["..."],
+    "keyWords_zh": ["..."],
+    "keyWords_en": ["..."],
+    "sentenceStructures_zh": ["..."],
+    "sentenceStructures_en": ["..."],
+    "teachingAids_zh": "...",
+    "teachingAids_en": "...",
+    "studentAnalysis_zh": "...",
+    "studentAnalysis_en": "...",
+    "audienceAnalysis": [
+      {
+        "type": "visual",
+        "description": "...",
+        "ageRange": "...",
+        "proficiency": "...",
+        "learningStyle": "..."
+      }
+    ]
   },
   "procedures": [
     {
-      "title_zh": "步骤1：导入 (5分钟)",
-      "title_en": "Step 1: Introduction (5 min)",
-      "content_zh": "**教师行为**：...\\n\\n**教师话术**：...\\n\\n**学生反应**：...",
-      "content_en": "**Teacher's Actions**: ...\\n\\n**Teacher's Talk**: ...\\n\\n**Students' Responses**: ...",
+      "title_zh": "步骤1：... (5分钟)",
+      "title_en": "Step 1: ... (5 min)",
+      "content_zh": "**教师行为**：...\\n\\n**教师话术**：...\\n\\n**学生反应**：...\\n\\n**设计意图**：...",
+      "content_en": "**Teacher's Actions**: ...\\n\\n**Teacher's Talk**: ...\\n\\n**Students' Responses**: ...\\n\\n**Design Rationale**: ...",
       "duration": 5
     }
   ]
@@ -316,4 +352,5 @@ interface ProcedureStep {
 ## 版本记录
 
 - v1.0 - 基础英语教案指令
-- v1.1 - 更新为与项目提示词构建器完全一致的结构（教学法、步骤数量、内容字段、创意引擎、CLIL/KWL等）
+- v1.1 - 更新为与项目提示词构建器一致的结构
+- v1.2 - 补充audienceAnalysis字段、时长计算规则、内容连贯性要求

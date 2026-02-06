@@ -153,7 +153,7 @@ export interface GeneratePlanParams {
   grade: string;
   duration: number;
   mode: 'task-based' | 'project-based' | 'PPP' | 'PWP' | 'TTT';
-  language?: 'zh' | 'en' | 'fr';
+  language?: 'zh' | 'en';
   words?: string[];
   vocabularyExtensions?: string;
   sentences?: string[];

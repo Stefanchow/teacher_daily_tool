@@ -1621,9 +1621,9 @@ const App: React.FC = () => {
             {/* Language Switch (Precision Style) */}
             <div className="relative flex items-center justify-center p-2">
               <div className="flex items-center gap-6 relative z-10">
-                {['zh', 'en', 'fr'].map((langCode) => {
+                {['zh', 'en'].map((langCode) => {
                   const isActive = language === langCode;
-                  const label = langCode === 'zh' ? '中' : langCode === 'en' ? 'EN' : 'FR';
+                  const label = langCode === 'zh' ? '中' : 'EN';
                   return (
                     <button
                       key={langCode}
