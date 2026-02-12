@@ -832,10 +832,11 @@ const PRESETS: Record<string, PresetConfig> = {
   'basic': {
     label: '进出门测',
     config: {
+      '听音选图': { count: 5, score: 1, selected: true },
+      '听短文选择': { count: 5, score: 2, selected: true },
       '单项选择': { count: 5, score: 1, selected: true },
-      '不同类单词': { count: 5, score: 2, selected: true },
       '阅读理解': { count: 5, score: 2, selected: true },
-      '补全句子': { count: 5, score: 2, selected: true },
+      '书面表达': { count: 1, score: 10, selected: true },
     }
   }
 };
@@ -973,16 +974,6 @@ const QuestionRow = ({ qKey, config, dispatch, activePopover, setActivePopover }
     }
   };
 
-  const handleIncrement = () => {
-    dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: sectionCount + 1 } }));
-  };
-
-  const handleDecrement = () => {
-    if (sectionCount > 1) {
-      dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: sectionCount - 1 } }));
-    }
-  };
-
   return (
     <div className="group flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-gray-100">
       {/* Left: Checkbox (Remove) & Name */}
@@ -996,8 +987,27 @@ const QuestionRow = ({ qKey, config, dispatch, activePopover, setActivePopover }
         </button>
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{qKey}</span>
+          
+          {/* Multiplier Controls (Visible on Hover) */}
+          <div className="hidden group-hover:flex items-center gap-1 ml-1">
+             {[2, 3].map(num => (
+               <button
+                 key={num}
+                 onClick={(e) => {
+                    e.stopPropagation();
+                    const newCount = sectionCount === num ? 1 : num;
+                    dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: newCount } }));
+                 }}
+                 className={`text-[10px] px-1 py-0.5 rounded border leading-none transition-all ${sectionCount === num ? 'bg-indigo-500 text-white border-indigo-500 font-bold shadow-sm' : 'bg-white text-gray-400 border-gray-200 hover:text-indigo-600 hover:border-indigo-300'}`}
+               >
+                 ×{num}
+               </button>
+             ))}
+          </div>
+
+          {/* Static Indicator (Hidden on Hover) */}
           {sectionCount > 1 && (
-             <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1 rounded">×{sectionCount}</span>
+             <span className="group-hover:hidden text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1 rounded">×{sectionCount}</span>
           )}
         </div>
       </div>
@@ -1982,7 +1992,7 @@ export const AIPaperGenerator: React.FC = () => {
 
         {/* Paper Preview Area - Scrollable Dark Container */}
         <div 
-          className={`w-full h-[85vh] overflow-auto rounded-xl border relative scrollbar-thin scrollbar-track-transparent ${selectedTemplate === 'primary_a3' ? 'p-8 flex justify-center' : ''}`} 
+          className={`w-full h-[calc(100vh-32px)] overflow-auto rounded-xl border relative scrollbar-thin scrollbar-track-transparent ${selectedTemplate === 'primary_a3' ? 'p-8 flex justify-center' : ''}`} 
           style={{
              backgroundColor: 'var(--container-bg)', 
              borderColor: 'var(--input-border)',
