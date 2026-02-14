@@ -61,7 +61,6 @@ import { LoginPage } from './components/auth/LoginPage';
 import { BackgroundBubbles } from './components/auth/BackgroundBubbles';
 import { Logo } from './components/common/Logo';
 import { setSession, fetchUserPoints } from './store/slices/userSlice';
-import { OnboardingTour } from './components/common/OnboardingTour';
 import { motion } from 'framer-motion';
 import { FileText, BookOpen, PartyPopper, BookMarked, Notebook } from 'lucide-react';
 
@@ -99,28 +98,13 @@ const App: React.FC = () => {
   const userSettings = useSelector((state: RootState) => state.userSettings);
   const { session, points, loading: authLoading } = useSelector((state: RootState) => state.user);
 
-  const [showOnboarding, setShowOnboarding] = React.useState(false);
-  const [tourCompleted, setTourCompleted] = React.useState(false);
   
   // State to track registration process and prevent auto-redirect to main app
   const [isRegistering, setIsRegistering] = React.useState(false);
   // State to track login animation
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
 
-  React.useEffect(() => {
-    if (session && !authLoading) {
-      const completed = localStorage.getItem('onboardingCompleted');
-      if (!completed) {
-        setShowOnboarding(true);
-      }
-    }
-  }, [session, authLoading]);
-
-  const handleTourComplete = () => {
-    setShowOnboarding(false);
-    setTourCompleted(true);
-    localStorage.setItem('onboardingCompleted', 'true');
-  };
+  
 
   React.useEffect(() => {
     // Check connection and restore session
@@ -147,6 +131,12 @@ const App: React.FC = () => {
   const favoritesImportRef = React.useRef<HTMLInputElement>(null);
   const [currentTheme, setCurrentTheme] = React.useState<ThemeType>('default');
   const [overlayRotation, setOverlayRotation] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('onboardingCompleted', 'true');
+    } catch {}
+  }, []);
 
   // Sync User Settings to Lesson State
   // React.useEffect(() => {
@@ -3247,9 +3237,6 @@ const App: React.FC = () => {
         accept=".json,.doc,.docx,.pdf"
       />
       
-      {showOnboarding && !tourCompleted && (
-        <OnboardingTour onComplete={handleTourComplete} />
-      )}
     </motion.div>
   );
 };
