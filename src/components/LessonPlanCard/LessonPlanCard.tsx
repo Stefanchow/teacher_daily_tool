@@ -130,7 +130,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
     <div className="space-y-10">
       {/* Teaching Preparation Card */}
       <div 
-        className="p-4 md:p-5 rounded-xl border shadow-sm transition-shadow"
+        className="p-4 md:p-5 rounded-2xl border shadow-sm transition-shadow"
         style={{ 
           backgroundColor: 'var(--card-bg)', 
           borderColor: 'var(--border-color)', 
@@ -147,7 +147,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
         </h4>
           <div className="grid grid-cols-1 gap-4 text-sm">
             <div 
-              className="p-3 rounded-xl"
+              className="p-3 rounded-2xl"
               style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             >
             <span className="block font-semibold mb-2" style={{ color: 'var(--primary-color)' }}>{labelObjectivesTitle}</span> 
@@ -161,14 +161,14 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
           
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div 
-                 className="p-3 rounded-xl"
+                 className="p-3 rounded-2xl"
                 style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                >
                  <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{locale.LABEL_TEACHING_AIDS}</span> 
                  <p className="leading-relaxed" style={{ color: 'var(--text-primary)', lineHeight: 1.7 as any }}>{cardData.teachingPreparation?.teachingAids || 'None'}</p>
                </div>
                <div 
-                 className="p-3 rounded-xl"
+                 className="p-3 rounded-2xl"
                  style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                >
                  <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{locale.LABEL_STUDENT_ANALYSIS}</span> 
@@ -287,7 +287,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
           <>
             <div className="fixed inset-0 z-10" onClick={() => setShowDownloadMenu(false)} />
             <div 
-              className="absolute bottom-full right-0 mb-2 w-44 bg-white rounded-lg shadow-xl border overflow-hidden z-20"
+              className="absolute bottom-full right-0 mb-2 w-44 bg-white rounded-2xl shadow-xl border overflow-hidden z-20"
               style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
             >
               <button
@@ -326,7 +326,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
         <div className="space-y-6">
           {/* Teaching Preparation in Table-like format */}
         <div 
-          className="p-4 md:p-5 rounded-xl md:border md:shadow-sm"
+          className="p-4 md:p-5 rounded-2xl md:border md:shadow-sm"
           style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)', maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto', paddingLeft: '12px', paddingRight: '12px' }}
         >
           <h4 
@@ -337,7 +337,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <div 
-              className="p-3 rounded-xl md:border"
+              className="p-3 rounded-2xl md:border"
               style={{ backgroundColor: 'var(--secondary-color)', borderColor: 'var(--border-color)' }}
             >
               <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{labelObjectivesTitle}</span>
@@ -349,7 +349,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
               </div>
             </div>
             <div 
-              className="p-3 rounded-xl md:border"
+              className="p-3 rounded-2xl md:border"
               style={{ backgroundColor: 'var(--secondary-color)', borderColor: 'var(--border-color)' }}
             >
               <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{labelKeywordsTitle}</span>
@@ -357,7 +357,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
             </div>
             {!isMathActivityZh && (
             <div 
-              className="p-3 rounded-xl md:border"
+              className="p-3 rounded-2xl md:border"
               style={{ backgroundColor: 'var(--secondary-color)', borderColor: 'var(--border-color)' }}
             >
               <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{labelSentencesTitle}</span>
@@ -367,14 +367,14 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
             </div>
             )}
             <div 
-              className="p-3 rounded-xl md:border"
+              className="p-3 rounded-2xl md:border"
               style={{ backgroundColor: 'var(--secondary-color)', borderColor: 'var(--border-color)' }}
             >
               <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{locale.LABEL_TEACHING_AIDS}</span>
               <p className="leading-relaxed" style={{ color: 'var(--text-primary)', lineHeight: 1.7 as any }}>{cardData.teachingPreparation?.teachingAids || 'None'}</p>
             </div>
               <div 
-                className="md:col-span-2 p-3 rounded-xl md:border"
+                className="md:col-span-2 p-3 rounded-2xl md:border"
                 style={{ backgroundColor: 'var(--secondary-color)', borderColor: 'var(--border-color)' }}
               >
                 <span className="block font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>{locale.LABEL_STUDENT_ANALYSIS}</span>
@@ -385,7 +385,7 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ plan, className,
 
       {/* Procedures in Table-like format */}
       <div 
-        className="p-4 md:p-5 rounded-xl md:border md:shadow-sm"
+        className="p-4 md:p-5 rounded-2xl md:border md:shadow-sm"
         style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)', maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto', paddingLeft: '12px', paddingRight: '12px' }}
       >
           <h4 

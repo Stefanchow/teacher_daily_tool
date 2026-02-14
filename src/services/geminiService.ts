@@ -18,6 +18,8 @@ export interface AIPaperParams {
   questionConfig: Record<string, QuestionConfigItem>;
   grade?: string;
   examScope?: string;
+  listeningOrder?: string[];
+  writingOrder?: string[];
 }
 
 export interface AIPaperQuestion {

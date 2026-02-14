@@ -42,6 +42,8 @@ export interface LessonState {
     paperType: string;
     examScope: string;
     questionConfig: Record<string, QuestionConfigItem>;
+    listeningOrder: string[];
+    writingOrder: string[];
     generatedPaper: AIPaper | null;
     isLoading: boolean;
     error: string | null;
@@ -57,7 +59,7 @@ export interface QuestionConfigItem {
 }
 
 export const LISTENING_QUESTIONS = [
-  '听音图片排序', '同类词选择', '听音选图', '听问句选答语', '短对话判断', '短对话选择', '长对话选择', '听短文选择', '听短文判断'
+  '图片排序', '同类词选择', '听音选图', '听问句选答语', '短对话判断', '短对话选择', '长对话选择', '听短文选择', '听短文判断'
 ];
 
 export const WRITING_QUESTIONS = [
@@ -119,6 +121,8 @@ const initialState: LessonState = {
     paperType: 'unit',
     examScope: '',
     questionConfig: initialQuestionConfig,
+    listeningOrder: [...LISTENING_QUESTIONS],
+    writingOrder: [...WRITING_QUESTIONS],
     generatedPaper: null,
     isLoading: false,
     error: null,
@@ -370,6 +374,12 @@ const lessonSlice = createSlice({
         state.aiPaper.questionConfig[key] = { ...state.aiPaper.questionConfig[key], ...changes };
       }
     },
+    setListeningOrder(state, action: PayloadAction<string[]>) {
+      state.aiPaper.listeningOrder = action.payload;
+    },
+    setWritingOrder(state, action: PayloadAction<string[]>) {
+      state.aiPaper.writingOrder = action.payload;
+    },
     setAIPaperSelectedTemplate(state, action: PayloadAction<string>) {
       state.aiPaper.selectedTemplate = action.payload;
     },
@@ -449,6 +459,8 @@ export const {
   setAIPaperType,
   setAIPaperQuestionConfig,
   updateQuestionConfigItem,
+  setListeningOrder,
+  setWritingOrder,
   setAIPaperSelectedTemplate,
   setAIPaperExamScope,
   updateGeneratedPaperQuestion,

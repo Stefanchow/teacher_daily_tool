@@ -11,6 +11,8 @@ import {
   setAIPaperSelectedTemplate,
   setAIPaperType,
   setAIPaperExamScope,
+  setListeningOrder,
+  setWritingOrder,
   updateGeneratedPaperQuestion,
   updateGeneratedPaperQuestionOption,
   generateAIPaperThunk,
@@ -27,7 +29,7 @@ import { AIPaper } from '../services/geminiService';
 // --- Constants ---
 const QUESTION_TITLES: Record<string, { en: string; zh: string; suffix?: string }> = {
   // Listening
-  '听音图片排序': { en: 'Listen and Choose', zh: '听录音，给你所听到的图片排序，每题读两遍。' },
+  '图片排序': { en: 'Listen and Choose', zh: '听录音，给你所听到的图片排序，每题读两遍。' },
   '同类词选择': { en: 'Listen and Choose', zh: '听录音，选出你所听到的单词，每题读两遍。' },
   '听音选图': { en: 'Listen and Choose', zh: '听录音，选出你所听到的图片，每题读两遍。' },
   '听问句选答语': { en: 'Listen and Choose', zh: '听录音，选出最合适的应答语，每题读两遍。' },
@@ -233,11 +235,11 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
     const qTypeMatch = Object.keys(QUESTION_TITLES).find(k => section.title.includes(k));
 
     // 1. Grid Layout (Sequencing / Look & Write)
-    if (qTypeMatch === '听音图片排序' || qTypeMatch === '看图写词') {
+    if (qTypeMatch === '图片排序' || qTypeMatch === '看图写词') {
       return (
         <div className="mt-4 px-2 font-[Arial]">
-          {qTypeMatch === '听音图片排序' ? (
-            // 听音图片排序：5个图片框一排，下面有横线和题号
+          {qTypeMatch === '图片排序' ? (
+            // 图片排序：5个图片框一排，下面有横线和题号
             <div className="flex flex-row justify-between">
               {section.questions.map((q: any, i: number) => {
                 globalQuestionIndex++;
@@ -366,63 +368,17 @@ const PaperRenderer: React.FC<{ paper: AIPaper; template: string; isMock?: boole
     return (
       <div className="space-y-3 ml-4 mt-2 font-[Arial]">
         {section.questions.map((q: any, i: number) => {
-           globalQuestionIndex++;
-           const isChoice = (q.options && q.options.length > 0) || qTypeMatch?.includes('选择') || qTypeMatch?.includes('选图') || qTypeMatch?.includes('不同类') || qTypeMatch?.includes('判断');
-           // Enhanced Image Detection
-           const isImageOpt = q.content.includes('image') || section.title.includes('选图') || section.title.includes('图片') || section.title.includes('Pictures') || (q.options && q.options.some((o: string) => o.includes('image')));
-           
-           const isJudgment = qTypeMatch?.includes('判断');
-           const showBracket = isChoice; // Judgment also needs brackets
-
-           // Clean Content
-           const cleanContent = q.content.replace(/image\s*options?/gi, '');
-           
-           return (
-              <div key={i} className={styles.question}>
-                 <div className="flex gap-1 items-start">
-                    {showBracket && <span className="mr-2 font-normal font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;)</span>}
-                    <span className="font-bold min-w-[1.5em] font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
-                    
-                    <div className="flex-1">
-                      <div className="font-[Arial]" dangerouslySetInnerHTML={{__html: cleanContent}} />
-                      
-                      {/* Options */}
-                       {isChoice && !isJudgment && (
-                          <div className="mt-1 flex flex-row flex-wrap gap-x-8 gap-y-2 font-[Arial]">
-                             {q.options && q.options.map((opt: string, oIdx: number) => {
-                                const label = String.fromCharCode(65 + oIdx);
-                                const cleanOpt = opt.replace(/^\s*\(?[A-Z]\)?[\.\s]*/, '').replace(/image\s*options?/gi, '');
-                                
-                                if (isImageOpt) {
-                                   return (
-                                      <div key={oIdx} className="flex items-center gap-2">
-                                         <span className="font-bold">{label}.</span>
-                                         <div className="w-12 h-12 border border-black flex items-center justify-center"></div>
-                                      </div>
-                                   );
-                                }
-                                return (
-                                   <div key={oIdx} className="flex items-center gap-2">
-                                      <span className="font-bold">{label}.</span>
-                                      <span>{cleanOpt}</span>
-                                   </div>
-                                );
-                             })}
-                             {/* Fallback for Image Choice if no options provided or explicit 'image options' in content */}
-                             {(!q.options || q.options.length === 0) && isImageOpt && (
-                                ['A', 'B', 'C'].map((label, oIdx) => (
-                                   <div key={oIdx} className="flex items-center gap-2">
-                                      <span className="font-bold">{label}.</span>
-                                      <div className="w-12 h-12 border border-black"></div>
-                                   </div>
-                                ))
-                             )}
-                          </div>
-                       )}
-                    </div>
-                 </div>
+          globalQuestionIndex++;
+          return (
+            <div key={i} className={styles.question}>
+              <div className="flex gap-1 items-start">
+                <span className="font-bold min-w-[1.5em] font-[Arial]">(&nbsp;&nbsp;&nbsp;&nbsp;){globalQuestionIndex}.</span>
+                <div className="flex-1">
+                  <div className="font-[Arial]" dangerouslySetInnerHTML={{__html: q.content.replace(/image\s*options?/gi, '')}} />
+                </div>
               </div>
-           );
+            </div>
+          );
         })}
       </div>
     );
@@ -810,7 +766,7 @@ const PRESETS: Record<string, PresetConfig> = {
     label: '试卷型',
     config: {
       // 听力
-      '听音图片排序': { count: 5, score: 1, selected: true },
+      '图片排序': { count: 5, score: 1, selected: true },
       '长对话选择': { count: 5, score: 1, selected: true },
       '短对话判断': { count: 5, score: 1, selected: true },
       '听短文选择': { count: 5, score: 2, selected: true },
@@ -988,26 +944,45 @@ const QuestionRow = ({ qKey, config, dispatch, activePopover, setActivePopover }
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{qKey}</span>
           
-          {/* Multiplier Controls (Visible on Hover) */}
-          <div className="hidden group-hover:flex items-center gap-1 ml-1">
-             {[2, 3].map(num => (
-               <button
-                 key={num}
-                 onClick={(e) => {
-                    e.stopPropagation();
-                    const newCount = sectionCount === num ? 1 : num;
-                    dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: newCount } }));
-                 }}
-                 className={`text-[10px] px-1 py-0.5 rounded border leading-none transition-all ${sectionCount === num ? 'bg-indigo-500 text-white border-indigo-500 font-bold shadow-sm' : 'bg-white text-gray-400 border-gray-200 hover:text-indigo-600 hover:border-indigo-300'}`}
-               >
-                 ×{num}
-               </button>
-             ))}
+          {/* Multiplier Controls (Plus/Minus) - Visible on Hover */}
+          <div className="hidden group-hover:flex items-center gap-1 ml-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700 shadow-sm">
+             <button
+               onClick={(e) => {
+                  e.stopPropagation();
+                  if (sectionCount > 1) {
+                    dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: sectionCount - 1 } }));
+                  }
+               }}
+               className="w-5 h-5 flex items-center justify-center rounded hover:bg-white dark:hover:bg-gray-700 text-gray-500 hover:text-red-500 transition-colors"
+               title="减少题量"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                 <line x1="5" y1="12" x2="19" y2="12"></line>
+               </svg>
+             </button>
+             
+             <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 min-w-[1.2em] text-center select-none">
+               {sectionCount > 1 ? `×${sectionCount}` : '×1'}
+             </span>
+
+             <button
+               onClick={(e) => {
+                  e.stopPropagation();
+                  dispatch(updateQuestionConfigItem({ key: qKey, changes: { sectionCount: sectionCount + 1 } }));
+               }}
+               className="w-5 h-5 flex items-center justify-center rounded hover:bg-white dark:hover:bg-gray-700 text-gray-500 hover:text-green-500 transition-colors"
+               title="增加题量"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                 <line x1="12" y1="5" x2="12" y2="19"></line>
+                 <line x1="5" y1="12" x2="19" y2="12"></line>
+               </svg>
+             </button>
           </div>
 
-          {/* Static Indicator (Hidden on Hover) */}
+          {/* Static Indicator (Hidden on Hover, only show if > 1) */}
           {sectionCount > 1 && (
-             <span className="group-hover:hidden text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1 rounded">×{sectionCount}</span>
+             <span className="group-hover:hidden ml-1 text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-md">×{sectionCount}</span>
           )}
         </div>
       </div>
@@ -1058,7 +1033,9 @@ export const AIPaperGenerator: React.FC = () => {
     questionConfig, 
     generatedPaper, 
     isLoading, 
-    selectedTemplate 
+    selectedTemplate,
+    listeningOrder,
+    writingOrder
   } = useSelector((state: RootState) => state.lesson.aiPaper);
 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -1069,6 +1046,47 @@ export const AIPaperGenerator: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   // const [examScope, setExamScope] = useState(''); // Moved to Redux
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Drag and Drop State
+  const [draggedItem, setDraggedItem] = useState<{ key: string, type: 'listening' | 'writing' } | null>(null);
+
+  const handleQuestionDragStart = (e: React.DragEvent, key: string, type: 'listening' | 'writing') => {
+    setDraggedItem({ key, type });
+    e.dataTransfer.effectAllowed = 'move';
+    // Optional: Set ghost image or data
+    e.dataTransfer.setData('text/plain', key);
+  };
+
+  const handleQuestionDragOver = (e: React.DragEvent, targetKey: string, type: 'listening' | 'writing') => {
+    e.preventDefault();
+    if (!draggedItem || draggedItem.type !== type || draggedItem.key === targetKey) return;
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleQuestionDrop = (e: React.DragEvent, targetKey: string, type: 'listening' | 'writing') => {
+    e.preventDefault();
+    if (!draggedItem || draggedItem.type !== type || draggedItem.key === targetKey) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const currentOrder = type === 'listening' ? listeningOrder : writingOrder;
+    const newOrder = [...currentOrder];
+    const fromIndex = newOrder.indexOf(draggedItem.key);
+    const toIndex = newOrder.indexOf(targetKey);
+
+    if (fromIndex !== -1 && toIndex !== -1) {
+      newOrder.splice(fromIndex, 1);
+      newOrder.splice(toIndex, 0, draggedItem.key);
+      
+      if (type === 'listening') {
+        dispatch(setListeningOrder(newOrder));
+      } else {
+        dispatch(setWritingOrder(newOrder));
+      }
+    }
+    setDraggedItem(null);
+  };
 
   // Handle Preset Selection
   const handlePresetSelect = (presetKey: string) => {
@@ -1211,7 +1229,7 @@ export const AIPaperGenerator: React.FC = () => {
          title: "2024-2025学年度第一学期英语学业水平监测",
          sections: [
            {
-             title: "听音图片排序",
+             title: "图片排序",
              type: "listening",
              instructions: "Listen and number.",
              questions: Array(5).fill(0).map((_, i) => ({ 
@@ -1359,6 +1377,9 @@ export const AIPaperGenerator: React.FC = () => {
     updateTemplate(stage, typeId);
   };
 
+  // Subject chips integrated into Stage section (UI only)
+  const [paperSubject, setPaperSubject] = useState<'英语' | '数学' | '语文'>('英语');
+
   const handleGenerate = () => {
     // Enforce Highest Priority Rules
     let finalConfig = { ...questionConfig };
@@ -1403,7 +1424,9 @@ export const AIPaperGenerator: React.FC = () => {
       stage,
       questionConfig: finalConfig,
       grade,
-      examScope
+      examScope,
+      listeningOrder,
+      writingOrder
     }));
   };
 
@@ -1471,7 +1494,7 @@ export const AIPaperGenerator: React.FC = () => {
                 }
                 hasValue={!!stage}
               />
-              <div className="flex justify-between items-center gap-3 p-1">
+              <div className="flex justify-between items-center gap-2 p-1">
                 {([
                   { id: '小学', label: t('ai_paper_stage_primary') }, 
                   { id: '初中', label: t('ai_paper_stage_junior') }, 
@@ -1480,7 +1503,7 @@ export const AIPaperGenerator: React.FC = () => {
                   <button
                     key={id}
                     onClick={() => handleStageSelect(id)}
-                    className={`flex-1 py-2.5 rounded-xl text-sm transition-all border-0 ${
+                    className={`flex-1 h-8 min-w-[72px] rounded-xl text-xs font-semibold transition-all border-0 ${
                       stage === id
                         ? 'font-bold active:scale-95 shadow-sm'
                         : 'bg-[#F3F4F6] text-gray-500 hover:bg-[#E5E7EB] dark:bg-white/5 dark:hover:bg-white/10'
@@ -1497,6 +1520,29 @@ export const AIPaperGenerator: React.FC = () => {
                   </button>
                 ))}
               </div>
+              <div className="flex justify-between items-center gap-2 p-1 mt-2">
+                {(['英语','数学','语文'] as const).map((subj) => (
+                  <button
+                    key={subj}
+                    onClick={() => setPaperSubject(subj)}
+                    className={`flex-1 h-8 min-w-[72px] rounded-xl text-xs font-semibold transition-all border-0 ${
+                      paperSubject === subj
+                        ? 'font-bold active:scale-95 shadow-sm'
+                        : 'bg-[#F3F4F6] text-gray-500 hover:bg-[#E5E7EB] dark:bg-white/5 dark:hover:bg-white/10'
+                    }`}
+                    style={paperSubject === subj ? { 
+                      background: 'linear-gradient(90deg, rgba(var(--primary-rgb), 0.15) 0%, rgba(var(--primary-rgb), 0.1) 100%)',
+                      color: 'var(--primary-color)',
+                      boxShadow: '0 2px 4px rgba(var(--primary-rgb), 0.15)'
+                    } : { 
+                      color: 'var(--text-secondary)' 
+                    }}
+                  >
+                    {subj}
+                  </button>
+                ))}
+              </div>
+              
             </div>
 
             {/* Level 2: Paper Type (Flex Layout) */}
@@ -1742,19 +1788,37 @@ export const AIPaperGenerator: React.FC = () => {
               } as React.CSSProperties}
             >
                {/* Listening */}
-               {LISTENING_QUESTIONS.some(q => questionConfig[q]?.selected) && (
+               {listeningOrder.some(q => questionConfig[q]?.selected) && (
                  <div className="text-[10px] font-bold text-gray-400 tracking-wider mb-1 px-2">听力</div>
                )}
-               {LISTENING_QUESTIONS.filter(q => questionConfig[q]?.selected).map(q => (
-                  <QuestionRow key={q} qKey={q} config={questionConfig[q]} dispatch={dispatch} activePopover={activePopover} setActivePopover={setActivePopover} />
+               {listeningOrder.filter(q => questionConfig[q]?.selected).map(q => (
+                  <div
+                    key={q}
+                    draggable
+                    onDragStart={(e) => handleQuestionDragStart(e, q, 'listening')}
+                    onDragOver={(e) => handleQuestionDragOver(e, q, 'listening')}
+                    onDrop={(e) => handleQuestionDrop(e, q, 'listening')}
+                    className={`transition-all cursor-move ${draggedItem?.key === q ? 'opacity-50 scale-95' : 'hover:scale-[1.01]'}`}
+                  >
+                    <QuestionRow qKey={q} config={questionConfig[q]} dispatch={dispatch} activePopover={activePopover} setActivePopover={setActivePopover} />
+                  </div>
                ))}
                
                {/* Writing */}
-              {WRITING_QUESTIONS.some(q => questionConfig[q]?.selected) && (
+              {writingOrder.some(q => questionConfig[q]?.selected) && (
                  <div className="text-[10px] font-bold text-gray-400 mt-3 mb-1 px-2">笔试</div>
                )}
-              {WRITING_QUESTIONS.filter(q => questionConfig[q]?.selected).map(q => (
-                  <QuestionRow key={q} qKey={q} config={questionConfig[q]} dispatch={dispatch} activePopover={activePopover} setActivePopover={setActivePopover} />
+              {writingOrder.filter(q => questionConfig[q]?.selected).map(q => (
+                  <div
+                    key={q}
+                    draggable
+                    onDragStart={(e) => handleQuestionDragStart(e, q, 'writing')}
+                    onDragOver={(e) => handleQuestionDragOver(e, q, 'writing')}
+                    onDrop={(e) => handleQuestionDrop(e, q, 'writing')}
+                    className={`transition-all cursor-move ${draggedItem?.key === q ? 'opacity-50 scale-95' : 'hover:scale-[1.01]'}`}
+                  >
+                    <QuestionRow qKey={q} config={questionConfig[q]} dispatch={dispatch} activePopover={activePopover} setActivePopover={setActivePopover} />
+                  </div>
                ))}
             </div>
                 

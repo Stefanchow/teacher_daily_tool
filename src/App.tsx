@@ -52,10 +52,18 @@ import { themes, ThemeType, getThemeWithWeeklyVariation, getThemeByWeek } from '
 import { downloadService } from './services/downloadService';
 import { adjustBrightness, hexToRgba, getAverageColor, isLightColor } from './utils/themeColorUtils';
 import { AIPaperGenerator } from './components/AIPaperGenerator';
-import { Sidebar } from './components/layout/Sidebar';
+import { TopNavigation } from './components/layout/TopNavigation';
 import { MembershipPage } from './components/membership/MembershipPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { FavoritesPage } from './components/favorites/FavoritesPage';
+import { supabase } from './utils/supabase';
+import { LoginPage } from './components/auth/LoginPage';
+import { BackgroundBubbles } from './components/auth/BackgroundBubbles';
+import { Logo } from './components/common/Logo';
+import { setSession, fetchUserPoints } from './store/slices/userSlice';
+import { OnboardingTour } from './components/common/OnboardingTour';
+import { motion } from 'framer-motion';
+import { FileText, BookOpen, PartyPopper, BookMarked, Notebook } from 'lucide-react';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -83,12 +91,59 @@ const App: React.FC = () => {
   const docInputRef = React.useRef<HTMLInputElement>(null);
   const allInputRef = React.useRef<HTMLInputElement>(null);
   const [isUploadOptionsOpen, setIsUploadOptionsOpen] = React.useState(false);
-  const [activeAITool, setActiveAITool] = React.useState<'camera' | 'upload' | 'voice' | null>(null);
+  const [activeAITool, setActiveAITool] = React.useState<'camera' | 'upload' | null>(null);
   const [previewFiles, setPreviewFiles] = React.useState<File[]>([]);
   const isMobile = React.useMemo(() => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent), []);
   const isAnalyzing = useSelector(selectIsAnalyzing);
   const { t, language } = useTranslation();
   const userSettings = useSelector((state: RootState) => state.userSettings);
+  const { session, points, loading: authLoading } = useSelector((state: RootState) => state.user);
+
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+  const [tourCompleted, setTourCompleted] = React.useState(false);
+  
+  // State to track registration process and prevent auto-redirect to main app
+  const [isRegistering, setIsRegistering] = React.useState(false);
+  // State to track login animation
+  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+
+  React.useEffect(() => {
+    if (session && !authLoading) {
+      const completed = localStorage.getItem('onboardingCompleted');
+      if (!completed) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [session, authLoading]);
+
+  const handleTourComplete = () => {
+    setShowOnboarding(false);
+    setTourCompleted(true);
+    localStorage.setItem('onboardingCompleted', 'true');
+  };
+
+  React.useEffect(() => {
+    // Check connection and restore session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      dispatch(setSession(session));
+      if (session) {
+        dispatch(fetchUserPoints(session.user.id));
+        console.log('Supabase Connected: Logged in as', session.user.email || session.user.phone);
+      } else {
+        console.log('Supabase Connected: No active session');
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      dispatch(setSession(session));
+      if (session) {
+        dispatch(fetchUserPoints(session.user.id));
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [dispatch]);
+
   const favoritesImportRef = React.useRef<HTMLInputElement>(null);
   const [currentTheme, setCurrentTheme] = React.useState<ThemeType>('default');
   const [overlayRotation, setOverlayRotation] = React.useState<number>(0);
@@ -221,7 +276,6 @@ const App: React.FC = () => {
 
   const [currentView, setCurrentView] = React.useState<'lesson-center' | 'membership' | 'settings' | 'favorites'>('lesson-center');
   const [previousView, setPreviousView] = React.useState<'lesson-center' | 'membership' | 'favorites'>('lesson-center');
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   // Clear Resources Logic
   const handleClearResources = async () => {
@@ -389,14 +443,14 @@ const App: React.FC = () => {
 
   const SUBJECT_FUNCTIONS: Record<Subject, FunctionItem[]> = {
     '英语': TEXTBOOK_CENTER_ENABLED
-      ? ['教案生成', '阅读课', '课堂活动', '教材中心', 'AI 组卷']
-      : ['教案生成', '阅读课', '课堂活动', 'AI 组卷'],
+      ? ['教案生成', '阅读课', '课堂活动', '教材中心']
+      : ['教案生成', '阅读课', '课堂活动'],
     '数学': TEXTBOOK_CENTER_ENABLED
-      ? ['教案生成', '课堂活动', '教材中心', 'AI 组卷']
-      : ['教案生成', '课堂活动', 'AI 组卷'],
+      ? ['教案生成', '课堂活动', '教材中心']
+      : ['教案生成', '课堂活动'],
     '语文': TEXTBOOK_CENTER_ENABLED
-      ? ['教案生成', '文学鉴赏', '课堂活动', '教材中心', 'AI 组卷']
-      : ['教案生成', '文学鉴赏', '课堂活动', 'AI 组卷']
+      ? ['教案生成', '文学鉴赏', '课堂活动', '教材中心']
+      : ['教案生成', '文学鉴赏', '课堂活动']
   };
 
   // Textbook Center
@@ -1559,8 +1613,31 @@ const App: React.FC = () => {
 
   const isGenerateDisabled = !isLoading && currentFunction !== '课堂活动' && !hasAnyInput;
 
+  if (authLoading) {
+    return (
+      <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <BackgroundBubbles isFocused={false} />
+        <div className="z-10 flex flex-col items-center gap-6">
+          <Logo className="scale-150" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent mt-4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login page if no session OR if user is currently registering (to prevent flash)
+  if (!session || isRegistering || isLoggingIn) {
+    return <LoginPage setIsRegistering={setIsRegistering} setIsLoggingIn={setIsLoggingIn} />;
+  }
+
   return (
-    <div className="min-h-screen font-sans transition-colors duration-300 relative flex overflow-hidden" style={{ backgroundColor: 'var(--bg-color)', backgroundImage: 'var(--bg-image)', color: 'var(--text-primary)' }}>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen font-sans transition-colors duration-300 relative flex overflow-hidden" 
+      style={{ backgroundColor: 'var(--bg-color)', backgroundImage: 'var(--bg-image)', color: 'var(--text-primary)' }}
+    >
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div
           className="aurora-bg"
@@ -1584,166 +1661,27 @@ const App: React.FC = () => {
         />
       </div>
 
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+      <TopNavigation 
         currentView={currentView} 
         onViewChange={handleViewChange} 
-        isMobile={isMobileScreen}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
+        currentSubject={currentSubject}
+        onSubjectChange={handleSubjectChange}
+        currentFunction={currentFunction}
+        onFunctionChange={handleFunctionChange}
+        subjectFunctions={SUBJECT_FUNCTIONS}
       />
 
-      <main className="flex-1 relative overflow-y-auto h-screen scrollbar-hide">
-        <div className="min-h-full transition-all duration-300 px-4 min-[1100px]:px-8 py-8">
+      <main className="flex-1 relative overflow-y-auto h-screen scrollbar-hide pt-[64px] md:pt-[88px]">
+        <div className="min-h-full transition-all duration-300 px-4 min-[1100px]:px-8 py-4 md:py-8">
 
         {viewToRender === 'lesson-center' && (
           <>
             {error && <Toast message={error} type="error" onClose={() => dispatch(setError(null))} />}
-            <div className="w-full mx-auto rounded-[24px] shadow-sm p-4 min-[1100px]:p-8 transition-colors duration-300 glass-panel" style={{ color: 'var(--text-primary)' }}>
-        <div 
-          className="flex items-center justify-between mb-6 gap-4 flex-wrap p-4 rounded-2xl backdrop-blur-md transition-colors duration-300 border border-white/20 shadow-sm"
-          style={{ backgroundColor: 'var(--header-bg)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-lg shadow-md overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 animate-pulse-slow">
-              <img 
-                src={APP_LOGO_BASE64} 
-                alt="Logo" 
-                className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-              />
-            </div>
-            <h1 className="text-3xl font-bold transition-colors duration-300" style={{ color: 'var(--header-text-color)' }}>{t('APP_TITLE')}</h1>
-          </div>
 
-          <div className="flex items-center gap-2">
 
-            {/* Language Switch (Precision Style) */}
-            <div className="relative flex items-center justify-center p-2">
-              <div className="flex items-center gap-6 relative z-10">
-                {['zh', 'en'].map((langCode) => {
-                  const isActive = language === langCode;
-                  const label = langCode === 'zh' ? '中' : 'EN';
-                  return (
-                    <button
-                      key={langCode}
-                      onClick={() => {
-                        dispatch(setUiLanguage(langCode as any));
-                        dispatch(setLanguage(langCode as any));
-                      }}
-                      className="group relative flex flex-col items-center justify-center focus:outline-none w-12 h-12"
-                    >
-                      {isActive && (
-                        <div 
-                          className="absolute inset-0 rounded-full bg-[var(--primary-color)] animate-pulse-slow"
-                          style={{ 
-                            opacity: 0.5,
-                            boxShadow: '0 0 30px rgba(var(--primary-rgb), 0.8)',
-                            filter: 'blur(6px)'
-                          }}
-                        />
-                      )}
-                      <span 
-                        className={`text-[18px] font-bold transition-all duration-300 relative z-10 ${
-                          isActive 
-                            ? 'text-[var(--text-primary)] scale-110' 
-                            : 'text-gray-400 hover:text-gray-300'
-                        }`}
-                        style={{
-                          textShadow: isActive ? '0 0 20px rgba(var(--primary-rgb), 0.8)' : 'none'
-                        }}
-                      >
-                        {label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="mb-2">
-          {/* Level 1: Subjects (Quizlet Segments Control Style) */}
-          <div className="w-full p-[6px] rounded-2xl bg-[#F1F2F6] flex items-center relative z-0">
-            {(Object.keys(SUBJECT_FUNCTIONS) as Subject[]).map((subject) => {
-              const isActive = currentSubject === subject;
-              return (
-                <button
-                  key={subject}
-                  onClick={() => handleSubjectChange(subject)}
-                  className={`
-                    relative flex-1 py-3 rounded-[12px] text-[18px] font-semibold transition-all duration-300
-                    flex items-center justify-center
-                    ${isActive ? 'bg-white text-gray-800 shadow-[0_4px_10px_rgba(0,0,0,0.1)] z-10 scale-[1.02]' : 'text-gray-400 hover:text-gray-600 hover:bg-black/5'}
-                  `}
-                >
-                  {getSubjectLabel(subject)}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Level 2: Functions (De-weighted Style) */}
-          <div className="mt-6 relative lg:overflow-visible overflow-x-hidden overflow-y-visible z-10">
-            {/* Arrows (indicators) on mobile */}
-            {canScrollLeft && (
-              <button
-                type="button"
-                onClick={() => scrollTabsBy(-160)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-transparent p-1"
-                aria-label="Scroll tabs left"
-              >
-                <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
-                  <path d="M8 2 L2 8 L8 14" stroke="var(--border-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            )}
-            {canScrollRight && (
-              <button
-                type="button"
-                onClick={() => scrollTabsBy(160)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-transparent p-1"
-                aria-label="Scroll tabs right"
-              >
-                <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
-                  <path d="M2 2 L8 8 L2 14" stroke="var(--border-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            )}
-            <div
-              ref={tabsScrollRef}
-              className="flex lg:justify-center lg:flex-wrap pb-2 px-1 lg:overflow-visible overflow-x-auto overflow-y-visible tabs-scroll gap-x-12"
-            >
-            {SUBJECT_FUNCTIONS[currentSubject].map((func) => {
-              const isActive = currentFunction === func;
-              return (
-                <button
-                  key={func}
-                  onClick={() => handleFunctionChange(func)}
-                  className={`
-                    relative py-2 text-[18px] font-semibold
-                    transition-all duration-300 whitespace-nowrap focus:outline-none flex items-center justify-center
-                    ${isActive 
-                      ? 'text-[var(--primary-color)] after:content-[""] after:absolute after:-bottom-[6px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--primary-color)] after:rounded-full after:shadow-[0_2px_4px_rgba(var(--primary-rgb),0.2)]' 
-                      : 'text-gray-400 hover:text-gray-600'}
-                  `}
-                  style={{
-                    backgroundColor: 'transparent',
-                    boxShadow: 'none'
-                  }}
-                >
-                  {getFunctionLabel(func)}
-                </button>
-              );
-            })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={`w-full mx-auto mt-6 ${currentFunction === 'AI 组卷' ? '' : 'flex flex-col lg:flex-row gap-6'}`}>
+      <div className={`w-full mx-auto mt-0 md:mt-4 lg:mt-6 ${currentFunction === 'AI 组卷' ? '' : 'flex flex-col lg:flex-row gap-6'}`}>
           
           <div 
              className={`${currentFunction === 'AI 组卷' ? 'w-full bg-transparent border-none shadow-none p-0' : 'w-full lg:w-1/4 p-6 rounded-2xl h-fit'}`}
@@ -1757,7 +1695,7 @@ const App: React.FC = () => {
              }}
            >
 
-        {(((currentSubject === '英语') && (currentFunction === '教案生成' || currentFunction === '阅读课')) || currentFunction === '课堂活动') ? (
+        {(currentFunction === '教案生成' || ((currentSubject === '英语') && currentFunction === '阅读课') || currentFunction === '课堂活动') ? (
         <div className="space-y-6">
           {/* Hidden Inputs for AI Upload */}
           <div className="hidden">
@@ -1786,6 +1724,81 @@ const App: React.FC = () => {
                <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>{t('SECTION_AI_INPUT')}</span>
             </div>
             
+            {/* Subject Switcher moved from TopNavigation */}
+            <div className="flex items-center gap-2 py-2 flex-wrap">
+              {(['英语','数学','语文'] as Subject[]).map(subj => {
+                const active = currentSubject === subj;
+                return (
+                  <button
+                    key={subj}
+                    onClick={() => setCurrentSubject(subj)}
+                    className={`px-3 py-2 h-9 md:h-10 min-w-[70px] md:min-w-[88px] rounded-2xl text-xs md:text-sm font-semibold transition-all`}
+                    style={active 
+                      ? { 
+                          background: 'linear-gradient(90deg, rgba(var(--primary-rgb), 0.15) 0%, rgba(var(--primary-rgb), 0.08) 100%)',
+                          color: 'var(--primary-color)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+                        } 
+                      : { 
+                          backgroundColor: 'rgba(255,255,255,0.9)', 
+                          color: 'var(--text-secondary)', 
+                          border: '1px solid var(--header-border, rgba(255,255,255,0.3))' 
+                        }}
+                  >
+                    {subj}
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* Function Buttons - mobile wrap with text; desktop/iPad wide keeps pills */}
+            <div className="flex items-center gap-2 py-2 w-full flex-wrap">
+              {SUBJECT_FUNCTIONS[currentSubject].map((func) => {
+                const active = currentFunction === func;
+                const icon = (() => {
+                  switch (func) {
+                    case '教案生成': return (<FileText className="w-6 h-6" />);
+                    case '阅读课': return (<BookOpen className="w-6 h-6" />);
+                    case '课堂活动': return (<PartyPopper className="w-6 h-6" />);
+                    case '文学鉴赏': return (<BookMarked className="w-6 h-6" />);
+                    case '教材中心': return (<Notebook className="w-6 h-6" />);
+                    case 'AI 组卷': return (<FileText className="w-6 h-6" />);
+                    default: return null;
+                  }
+                })();
+                return (
+                  <button
+                    key={func}
+                    onClick={() => {
+                      const defaultSubject = (() => {
+                        for (const [subj, funcs] of Object.entries(SUBJECT_FUNCTIONS)) {
+                          if (funcs.includes(func as FunctionItem)) return subj as Subject;
+                        }
+                        return currentSubject;
+                      })();
+                      setCurrentSubject(defaultSubject);
+                      setCurrentFunction(func as FunctionItem);
+                    }}
+                    className={`px-3 py-2 h-9 rounded-2xl text-xs font-semibold transition-all flex items-center gap-2 hover:bg-[#A084FF33]`}
+                    style={active 
+                      ? { 
+                          background: 'linear-gradient(90deg, rgba(var(--primary-rgb), 0.15) 0%, rgba(var(--primary-rgb), 0.08) 100%)',
+                          color: 'var(--primary-color)', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.06)' 
+                        } 
+                      : { 
+                          backgroundColor: 'rgba(255,255,255,0.9)', 
+                          color: 'var(--text-secondary)', 
+                          border: '1px solid var(--header-border, rgba(255,255,255,0.3))' 
+                        }}
+                  >
+                    <span className="w-5 h-5">{icon}</span>
+                    <span className="text-xs md:text-sm font-semibold">{func}</span>
+                  </button>
+                );
+              })}
+            </div>
+            
             <div className="flex items-center gap-3 py-2">
                {/* Camera */}
                <div className="relative group flex flex-col items-center gap-1 cursor-pointer" onClick={() => cameraInputRef.current?.click()}>
@@ -1805,47 +1818,30 @@ const App: React.FC = () => {
                      </svg>
                   </div>
                </div>
-
-               {/* Voice */}
-               <div className="relative group flex flex-col items-center gap-1 cursor-pointer" onClick={() => setActiveAITool(activeAITool === 'voice' ? null : 'voice')}>
-                  <div className={`w-14 h-14 rounded-xl bg-white border border-gray-200 flex items-center justify-center transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_0_20px_var(--primary-color)] group-hover:border-[var(--primary-color)] ${activeAITool === 'voice' ? 'border-[var(--primary-color)] shadow-[0_0_20px_var(--primary-color)]' : ''}`}>
-                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)' }}>
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                     </svg>
-                  </div>
-               </div>
             </div>
 
             {/* Micro-operation Area */}
-            <div className={`transition-all duration-300 overflow-hidden ${activeAITool ? 'max-h-60 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+            <div className={`transition-all duration-300 overflow-hidden ${activeAITool ? 'max-h-60 opacity-100 mb-4' : (previewFiles.length>0 ? 'max-h-60 opacity-100 mb-4' : 'max-h-0 opacity-0')}`}>
                <div className="p-3 rounded-xl border border-indigo-100 bg-indigo-50/30 backdrop-blur-sm flex items-center gap-3 overflow-x-auto">
-                   {activeAITool === 'voice' ? (
-                       <div className="flex items-center gap-3 w-full justify-center py-2">
-                           <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-                           <span className="text-sm text-gray-600">正在聆听... (Listening...)</span>
-                       </div>
-                   ) : (
-                       previewFiles.length > 0 ? (
-                           previewFiles.map((file, idx) => (
-                               <div key={idx} className="relative w-16 h-16 rounded-lg border border-gray-200 bg-white overflow-hidden flex-shrink-0">
-                                   {file.type.startsWith('image/') ? (
-                                       <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
-                                   ) : (
-                                       <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500 bg-gray-50 p-1 text-center break-all">
-                                           {file.name.slice(-10)}
-                                       </div>
-                                   )}
-                               </div>
-                           ))
-                       ) : (
-                           <div className="text-xs text-gray-400 italic w-full text-center">
-                               {activeAITool === 'camera' ? '请拍摄照片...' : '请选择文件...'}
+                 {
+                   previewFiles.length > 0 ? (
+                     previewFiles.map((file, idx) => (
+                       <div key={idx} className="relative w-16 h-16 rounded-lg border border-gray-200 bg-white overflow-hidden flex-shrink-0">
+                         {file.type.startsWith('image/') ? (
+                           <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500 bg-gray-50 p-1 text-center break-all">
+                             {file.name.slice(-10)}
                            </div>
-                       )
-                   )}
+                         )}
+                       </div>
+                     ))
+                   ) : (
+                     <div className="text-xs text-gray-400 italic w-full text-center">
+                       {activeAITool === 'camera' ? '请拍摄照片...' : '请选择文件...'}
+                     </div>
+                   )
+                 }
                </div>
             </div>
           </div>
@@ -2332,7 +2328,7 @@ const App: React.FC = () => {
           <button
             onClick={handleGenerate}
             disabled={isGenerateDisabled}
-            className={`w-full font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center text-lg ${
+            className={`w-full font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center text-lg ${
               isGenerateDisabled
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
                 : error 
@@ -2437,7 +2433,7 @@ const App: React.FC = () => {
                             setSelectedId(tb.id);
                             setTimeout(() => setHideOthers(true), 300);
                           }}
-                          className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] border"
+                          className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] border"
                           style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
                         >
                           <div className="h-32 flex items-center justify-center text-2xl font-bold"
@@ -3020,20 +3016,7 @@ const App: React.FC = () => {
       </div>
       </main>
 
-      <button
-        onClick={() => setIsSidebarOpen(prev => !prev)}
-        className="fixed bottom-5 right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center"
-        style={{
-          backgroundColor: 'var(--primary-color)',
-          color: '#fff',
-          transition: 'transform 300ms',
-          zIndex: 9000
-        }}
-      >
-        <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+
 
       {isWeChatShareOpen && (
         <>
@@ -3263,7 +3246,11 @@ const App: React.FC = () => {
         }}
         accept=".json,.doc,.docx,.pdf"
       />
-    </div>
+      
+      {showOnboarding && !tourCompleted && (
+        <OnboardingTour onComplete={handleTourComplete} />
+      )}
+    </motion.div>
   );
 };
 

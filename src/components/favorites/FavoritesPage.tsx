@@ -291,7 +291,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
                        e.stopPropagation();
                        // Feature pending
                     }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
                     style={{ 
                         backgroundColor: 'var(--secondary-color)', 
                         color: 'var(--primary-color)' 
@@ -373,7 +373,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8 animate-in fade-in duration-300 relative">
+    <div className="max-w-7xl mx-auto px-2 py-6 md:px-8 md:py-8 space-y-8 animate-in fade-in duration-300 relative">
       
       {/* Sparkle Effect */}
       {showSparkle && (
@@ -464,7 +464,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
                      }}
                      disabled={selectedIds.size === 0 || isExporting}
                      className={`
-                        px-5 py-3 font-bold rounded-xl transition-all shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:shadow-none
+                        px-5 py-3 font-bold rounded-l transition-all shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:shadow-none
                         ${exportStatus === 'success' 
                            ? 'bg-green-500 text-white shadow-green-200 hover:bg-green-600' 
                            : exportStatus === 'error'
@@ -507,7 +507,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
                   </button>
                   
                   {exportMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
                       <button
                         onClick={() => handleBatchExport('docx')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition-colors"
@@ -559,7 +559,10 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
 
       {/* Empty State */}
       {favorites.length === 0 ? (
-        <div className="py-24 text-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50">
+        <div 
+          className="rounded-2xl border-2 border-dashed p-12 text-center"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
           <svg className="w-20 h-20 mx-auto mb-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
@@ -591,13 +594,13 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
              <div className="flex gap-4">
                 <button 
                    onClick={() => setShowDeleteConfirm(false)}
-                   className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                   className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-colors"
                 >
                    {t('fav_cancel')}
                 </button>
                 <button 
                    onClick={handleClearAllConfirm}
-                   className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
+                   className="flex-1 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 shadow-lg shadow-red-200 transition-all"
                 >
                    {t('fav_confirm')}
                 </button>

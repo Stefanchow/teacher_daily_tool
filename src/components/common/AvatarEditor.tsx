@@ -199,10 +199,10 @@ export const AvatarEditor: React.FC<AvatarEditorProps> = ({ isOpen, onClose, onS
             </button>
             
             <div className="flex gap-2">
-              <button onClick={onClose} className="px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">取消</button>
+              <button onClick={onClose} className="px-4 py-2 rounded-2xl text-gray-500 hover:bg-gray-100 transition-colors">取消</button>
               <button 
                 onClick={handleSave}
-                className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-105"
+                className="px-6 py-2 rounded-2xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-105"
               >
                 确认使用
               </button>

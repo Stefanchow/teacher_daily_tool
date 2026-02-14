@@ -7,10 +7,12 @@ export interface AIPaperParams {
   questionConfig: Record<string, QuestionConfigItem>;
   grade?: string;
   examScope?: string;
+  listeningOrder?: string[];
+  writingOrder?: string[];
 }
 
 const LISTENING_KEYS = [
-  '听音图片排序', '同类词选择', '听音选图', '听问句选答语', '短对话判断', '短对话选择', '长对话选择', '听短文选择', '听短文判断'
+  '图片排序', '同类词选择', '听音选图', '听问句选答语', '短对话判断', '短对话选择', '长对话选择', '听短文选择', '听短文判断'
 ];
 
 const WRITING_KEYS_ORDER = [
@@ -18,7 +20,7 @@ const WRITING_KEYS_ORDER = [
 ];
 
 export const buildAIPaperPrompt = (params: AIPaperParams): string => {
-  const { theme, specialTopic, stage, questionConfig, grade, examScope } = params;
+  const { theme, specialTopic, stage, questionConfig, grade, examScope, listeningOrder, writingOrder } = params;
   
   // Filter selected questions
   const selectedQuestions = Object.entries(questionConfig)
@@ -27,7 +29,20 @@ export const buildAIPaperPrompt = (params: AIPaperParams): string => {
   // Split and Sort
   const listeningQuestions = selectedQuestions
     .filter(([key]) => LISTENING_KEYS.includes(key))
-    .sort((a, b) => LISTENING_KEYS.indexOf(a[0]) - LISTENING_KEYS.indexOf(b[0]));
+    .sort((a, b) => {
+      if (listeningOrder && listeningOrder.length > 0) {
+        const idxA = listeningOrder.indexOf(a[0]);
+        const idxB = listeningOrder.indexOf(b[0]);
+        // If both keys are in the custom order list, sort by that
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        // If only one is in the list? Put it first? Or last?
+        // Let's assume the list is comprehensive for displayed items.
+        // If not found, fall back to default logic or put at end.
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+      }
+      return LISTENING_KEYS.indexOf(a[0]) - LISTENING_KEYS.indexOf(b[0]);
+    });
 
   const writingQuestions = selectedQuestions
       .filter(([key]) => !LISTENING_KEYS.includes(key))
@@ -35,17 +50,20 @@ export const buildAIPaperPrompt = (params: AIPaperParams): string => {
         const keyA = a[0];
         const keyB = b[0];
         
+        if (writingOrder && writingOrder.length > 0) {
+          const idxA = writingOrder.indexOf(keyA);
+          const idxB = writingOrder.indexOf(keyB);
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          if (idxA !== -1) return -1;
+          if (idxB !== -1) return 1;
+        }
+
         // Always force '书面表达' to the very end
         if (keyA === '书面表达') return 1;
         if (keyB === '书面表达') return -1;
 
         const idxA = WRITING_KEYS_ORDER.indexOf(keyA);
         const idxB = WRITING_KEYS_ORDER.indexOf(keyB);
-        // If not found in order list, put before '书面表达' but after known ones? 
-        // Or just treat unknown as intermediate.
-        // Let's keep unknown ones (999) at the end, but since we handle '书面表达' explicitly above, it will stay last.
-        // Actually, if we use 999 for unknown, they will be AFTER '书面表达' (if we didn't have the explicit check above).
-        // With the explicit check above, '书面表达' wins.
         return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
       });
 
