@@ -373,7 +373,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-2 py-6 md:px-8 md:py-8 space-y-8 animate-in fade-in duration-300 relative">
+    <div className="max-w-7xl mx-auto px-2 py-4 md:px-8 md:py-8 space-y-8 animate-in fade-in duration-300 relative">
       
       {/* Sparkle Effect */}
       {showSparkle && (

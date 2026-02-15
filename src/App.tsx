@@ -2988,7 +2988,7 @@ const App: React.FC = () => {
       )}
 
       {viewToRender === 'favorites' && (
-        <div className="w-full h-full p-4 min-[1100px]:p-8 overflow-y-auto">
+        <div className="w-full h-full px-2 py-4 md:px-4 md:py-6 min-[1100px]:p-8 overflow-y-auto">
            <FavoritesPage
               favorites={favorites}
               onRemove={removeFavorite}

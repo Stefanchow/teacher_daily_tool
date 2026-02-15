@@ -47,6 +47,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
   // New states for Account Settings
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [editingName, setEditingName] = useState('');
+  const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ new: '', confirm: '' });
 
@@ -79,7 +80,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
   }, []);
 
   const handleUpdateUsername = async () => {
-    if (!editingName.trim()) return;
+    if (!editingName.trim()) {
+      setIsEditingUsername(false);
+      return;
+    }
+    if (isSavingUsername) return;
+    if (editingName.trim() === currentNickname.trim()) {
+      setIsEditingUsername(false);
+      return;
+    }
+    setIsSavingUsername(true);
     
     // 1. Update Supabase Auth Metadata
     const { error: authError } = await supabase.auth.updateUser({
@@ -88,6 +98,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
     
     if (authError) {
       setToast({ show: true, message: '更新用户名失败: ' + authError.message });
+      setIsSavingUsername(false);
       return;
     }
 
@@ -106,6 +117,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
 
     dispatch(setNickname(editingName));
     setIsEditingUsername(false);
+    setIsSavingUsername(false);
     setToast({ show: true, message: '用户名已更新' });
     setTimeout(() => setToast(null), 3000);
   };
@@ -416,10 +428,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
             )}
           </div>
           
-          <div className="flex-1">
-            <div className="flex items-center gap-4">
+            <div className="flex-1">
+            <div className="flex items-center gap-2">
               {isEditingUsername ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                   <input
                     type="text"
                     value={editingName}
@@ -428,33 +440,40 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate, onClearR
                     className="text-2xl font-bold bg-transparent border-b-2 border-indigo-500 focus:outline-none w-48 py-1"
                     style={{ color: 'var(--text-primary)' }}
                     autoFocus
+                    onBlur={handleUpdateUsername}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleUpdateUsername();
+                      }
+                      if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setIsEditingUsername(false);
+                        setEditingName(currentNickname);
+                      }
+                    }}
                   />
-                  <button onClick={handleUpdateUsername} className="p-2 text-green-600 hover:bg-green-50 rounded-full">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  </button>
-                  <button onClick={() => setIsEditingUsername(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
                 </div>
               ) : (
-                <h2 className="text-3xl font-bold flex items-center gap-1 group" style={{ color: 'var(--text-primary)' }}>
-                  {currentNickname}
-                  <button 
-                    onClick={() => {
-                      setEditingName(currentNickname);
-                      setIsEditingUsername(true);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-indigo-500"
-                    title="修改用户名"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingName(currentNickname);
+                    setIsEditingUsername(true);
+                  }}
+                  className="text-3xl font-bold flex items-center gap-1 group bg-transparent border-none p-0 cursor-text"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <span>{currentNickname}</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-indigo-500">
+                    <svg className="w-5 h-5 inline-block align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
-                  </button>
-                </h2>
+                  </span>
+                </button>
               )}
               
-              <span className={`ml-1 px-3 py-1 text-sm font-bold rounded-full border uppercase tracking-wide ${
+              <span className={`px-3 py-1 text-sm font-bold rounded-full border uppercase tracking-wide ${
                 settings.membershipStatus === 'pro' 
                   ? 'bg-amber-100 text-amber-700 border-amber-200' 
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
