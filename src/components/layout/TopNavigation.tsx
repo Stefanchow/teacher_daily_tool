@@ -10,6 +10,7 @@ import { AvatarEditor } from '../common/AvatarEditor';
 import { supabase } from '../../utils/supabase';
 import { Logo } from '../common/Logo';
 import { Shirt, Settings as SettingsIcon, Stars, Layers, FileText, Star, Crown } from 'lucide-react';
+import { adjustBrightness, isLightColor } from '../../utils/themeColorUtils';
 
 // Align with App.tsx unions to avoid function type mismatches
 type Subject = '英语' | '数学' | '语文';
@@ -71,6 +72,48 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       return false;
     }
   }, [currentTheme]);
+
+  const pageBgHex = React.useMemo(() => {
+    try {
+      const val = getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim();
+      return val && val.startsWith('#') ? val : '#ffffff';
+    } catch {
+      return '#ffffff';
+    }
+  }, [currentTheme]);
+
+  const headerSolid = React.useMemo(() => adjustBrightness(pageBgHex, isDarkBg ? 0.12 : -0.14), [pageBgHex, isDarkBg]);
+  const bottomSolid = React.useMemo(() => adjustBrightness(pageBgHex, isDarkBg ? 0.18 : -0.18), [pageBgHex, isDarkBg]);
+
+  const [windowWidth, setWindowWidth] = React.useState<number>(() => (typeof window !== 'undefined' ? window.innerWidth : 1024));
+  React.useEffect(() => {
+    const handler = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  const isDesktop = windowWidth >= 768;
+
+  const navText = React.useMemo(() => {
+    if (isDesktop) return '#0f172a';
+    return isLightColor(headerSolid) ? '#0f172a' : '#ffffff';
+  }, [headerSolid, isDesktop]);
+
+  const getCssVar = (name: string): string => {
+    try {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v && v.startsWith('#') ? v : '#6366f1';
+    } catch {
+      return '#6366f1';
+    }
+  };
+  const themePrimary = React.useMemo(() => getCssVar('--primary-color'), [currentTheme]);
+  const activeColor = React.useMemo(() => {
+    const bgLight = isLightColor(headerSolid);
+    const primLight = isLightColor(themePrimary);
+    if (bgLight && primLight) return adjustBrightness(themePrimary, -0.35);
+    if (!bgLight && !primLight) return adjustBrightness(themePrimary, 0.75);
+    return themePrimary;
+  }, [headerSolid, themePrimary]);
 
   const handleSaveAvatar = async (base64: string) => {
     // Optimistic update
@@ -214,10 +257,9 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         <div
           className="pointer-events-auto h-[64px] w-full backdrop-blur-xl"
           style={{
-            backgroundImage: isDarkBg
-              ? 'linear-gradient(180deg, color-mix(in oklab, var(--header-bg) 48%, #0A1328 52%), color-mix(in oklab, var(--header-bg) 90%, #ffffff 10%))'
-              : 'linear-gradient(180deg, color-mix(in oklab, var(--header-bg) 48%, #0A1328 52%), color-mix(in oklab, var(--header-bg) 90%, #ffffff 10%))',
-            boxShadow: '0 8px 32px rgba(31,38,135,0.12)'
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            backgroundImage: 'linear-gradient(180deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--primary-rgb), 0.03) 100%)',
+            boxShadow: '0 6px 12px var(--shadow-color)'
           }}
         >
           <div className="mx-auto w-full h-full flex items-center justify-between px-3 sm:px-4 md:px-6 xl:px-8">
@@ -272,11 +314,11 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                       className={`
                         relative w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full md:rounded-[12px] text-sm font-semibold transition-transform duration-300 group-hover:scale-105 active:scale-95 flex items-center justify-center md:justify-start md:gap-2
                       `}
-                      style={{ color: 'var(--text-primary)' }}
+                      style={{ color: navText }}
                     >
                       <span className="w-5 h-5">{icon}</span>
                       {item.id === 'points' && (
-                        <span className="ml-1 text-xs font-bold md:text-base" style={{ color: 'var(--text-primary)' }}>{points}</span>
+                        <span className="ml-1 text-xs font-bold md:text-base" style={{ color: navText }}>{points}</span>
                       )}
                       <span className="hidden md:inline">{item.label}</span>
                     </button>
@@ -310,7 +352,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                       color: 'var(--primary-color)',
                       boxShadow: '0 2px 6px rgba(var(--primary-rgb), 0.15)'
                     } : { 
-                      color: 'var(--text-primary)'
+                      color: navText
                     }}
                   >
                     {langCode === 'zh' ? '中' : 'EN'}
@@ -324,7 +366,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               onClick={onToggleTheme}
               className="p-2 rounded-[12px] transition-colors hover:bg-[#A084FF33]"
               title="Switch Theme"
-              style={{ color: 'var(--text-primary)' }}
+              style={{ color: navText }}
             >
               <Shirt className="w-6 h-6" />
             </button>
@@ -332,7 +374,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               onClick={() => onViewChange('settings')}
               className="p-2 rounded-[12px] transition-colors hover:bg-[#A084FF33]"
               title="Settings"
-              style={{ color: 'var(--text-primary)' }}
+              style={{ color: navText }}
             >
               <SettingsIcon className="w-6 h-6" />
             </button>
@@ -358,7 +400,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 backdrop-blur-md rounded-[12px] border shadow-sm transition-transform hover:scale-105 cursor-default"
               style={{ backgroundColor: 'rgba(255,255,255,0.4)', borderColor: 'var(--header-border, rgba(255,255,255,0.3))', padding: '4px 8px' }}>
               <Stars className="w-6 h-6" />
-              <span className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>{points}</span>
+              <span className="font-bold text-base" style={{ color: navText }}>{points}</span>
             </div>
           </div>
         </div>
@@ -369,10 +411,9 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         <div
           className="pointer-events-auto h-[58px] w-full backdrop-blur-xl"
           style={{
-            backgroundImage: isDarkBg
-              ? 'linear-gradient(180deg, color-mix(in oklab, var(--header-bg) 40%, #091022 60%), color-mix(in oklab, var(--header-bg) 90%, #ffffff 10%))'
-              : 'linear-gradient(180deg, color-mix(in oklab, var(--header-bg) 40%, #091022 60%), color-mix(in oklab, var(--header-bg) 90%, #ffffff 10%))',
-            boxShadow: '0 -8px 24px rgba(31,38,135,0.12)'
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            backgroundImage: 'linear-gradient(0deg, rgba(var(--primary-rgb), 0.06) 0%, rgba(var(--primary-rgb), 0.02) 100%)',
+            boxShadow: '0 -6px 12px var(--shadow-color)'
           }}
         >
           <div className="mx-auto w-full h-full flex items-stretch justify-between px-2">
@@ -396,7 +437,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   key={`bottom-${item.id}`}
                   onClick={() => handleMenuClick(item)}
                   className="flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-semibold relative"
-                  style={{ color: isActive ? 'var(--primary-color)' : 'var(--text-primary)' }}
+                  style={{ color: isActive ? activeColor : navText }}
                 >
                   <span className="w-5 h-5">{icon}</span>
                   <span className="leading-none">{item.label}</span>

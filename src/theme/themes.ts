@@ -361,6 +361,25 @@ export const getThemeWithWeeklyVariation = (theme: Theme): Theme => {
   newTheme.colors['--card-bg'] = blend(newTheme.colors['--card-bg'], sPick, 0.12);
   newTheme.colors['--text-secondary'] = blend(newTheme.colors['--text-secondary'], sPick, 0.15);
   newTheme.colors['--avatar-bg'] = blend(newTheme.colors['--avatar-bg'], sPick, 0.25);
+  const toRgb = (hex: string) => {
+    const h = hex.replace('#','');
+    const r = parseInt(h.substring(0,2),16);
+    const g = parseInt(h.substring(2,4),16);
+    const b = parseInt(h.substring(4,6),16);
+    return `${r}, ${g}, ${b}`;
+  };
+  const bg = newTheme.colors['--bg-color'] || '#ffffff';
+  const p = newTheme.colors['--primary-color'] || '#6366f1';
+  const isLight = (() => {
+    const h = bg.replace('#','');
+    const r = parseInt(h.substring(0,2),16);
+    const g = parseInt(h.substring(2,4),16);
+    const b = parseInt(h.substring(4,6),16);
+    const yiq = (r*299 + g*587 + b*114)/1000;
+    return yiq >= 140;
+  })();
+  const alpha = isLight ? 0.18 : 0.6;
+  newTheme.colors['--shadow-color'] = `rgba(${toRgb(p)}, ${alpha})`;
   
   return newTheme;
 };
