@@ -35,11 +35,26 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
     );
   }
 
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    e.currentTarget.style.setProperty('--ripple-x', `${x}%`);
+    e.currentTarget.style.setProperty('--ripple-y', `${y}%`);
+    e.currentTarget.classList.remove('is-rippling');
+    void e.currentTarget.offsetWidth;
+    e.currentTarget.classList.add('is-rippling');
+    if (props.onClick) {
+      props.onClick(e);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <button 
         className={`${styles.button} ${className || ''}`} 
         {...props}
+        onClick={handleClick}
       >
         生成教案
       </button>

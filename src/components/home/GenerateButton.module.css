@@ -1,14 +1,98 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2.8rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: #0f172a;
+  background: rgba(248, 250, 252, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.65);
+  backdrop-filter: blur(22px);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 0.2s cubic-bezier(0.19, 1, 0.22, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.88), transparent 55%),
+    radial-gradient(circle at 100% 120%, rgba(129, 140, 248, 0.45), transparent 55%);
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(129, 140, 248, 0.35), transparent 65%);
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+  pointer-events: none;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 24px 55px rgba(15, 23, 42, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-color: rgba(129, 140, 248, 0.75);
+  background: rgba(248, 250, 252, 0.18);
+}
+
+.button:active {
+  transform: scale(0.95) translateY(0);
+  box-shadow:
+    0 10px 26px rgba(15, 23, 42, 0.36),
+    0 0 0 1px rgba(129, 140, 248, 0.9);
+}
+
+.button.is-rippling::after {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
 .loadingContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 240px; /* Increased width for wave */
-  height: 80px; /* Increased height for wave */
-  border-radius: 12px;
+  width: 240px;
+  height: 80px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 6px var(--shadow-color);
-  background-color: var(--card-bg);
-  background-image: var(--card-gradient);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at 0% 0%, rgba(248, 250, 252, 0.28), transparent 55%), rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(26px);
+}
+
+.loadingContainer svg {
+  color: #a5b4fc;
 }
 
 .cancelButton {
@@ -16,8 +100,8 @@
   top: 8px;
   right: 8px;
   z-index: 20;
-  background: rgba(255,255,255,0.8);
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
   width: 24px;
   height: 24px;
   display: flex;
@@ -25,10 +109,20 @@
   justify-content: center;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .cancelButton:hover {
-  background: white;
-  transform: scale(1.1);
+  background: #ffffff;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.38);
+}
+
+.cancelButton:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.3);
 }

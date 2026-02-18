@@ -300,7 +300,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ setIsRegistering, setIsLog
 
   const getTitle = () => {
     switch (mode) {
-      case 'login': return '欢迎回来';
+      case 'login': return 'Classcard';
       case 'register': return '创建账号';
       case 'forgot_password': return '重置密码';
     }
